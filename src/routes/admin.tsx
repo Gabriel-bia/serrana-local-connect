@@ -147,6 +147,62 @@ function newId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
+/**
+ * Campo de Link do WhatsApp com validação e botão "Testar Link".
+ * O administrador cola o link completo (https://wa.me/... ou https://api.whatsapp.com/...).
+ */
+function WhatsAppLinkField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const trimmed = value.trim();
+  const isValid = isValidWhatsappLink(trimmed);
+  const showError = trimmed.length > 0 && !isValid;
+
+  return (
+    <Field label="Link do WhatsApp">
+      <div className="flex gap-2">
+        <input
+          type="url"
+          className={`${inputClass} ${showError ? "border-destructive focus:ring-destructive" : ""}`}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://wa.me/5535999990000"
+          required
+        />
+        <a
+          href={isValid ? trimmed : undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => {
+            if (!isValid) {
+              e.preventDefault();
+              alert("Cole um link válido começando com https://wa.me/ ou https://api.whatsapp.com/");
+            }
+          }}
+          className={`inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition ${
+            isValid ? "hover:bg-muted text-foreground" : "opacity-60 cursor-not-allowed"
+          }`}
+        >
+          <ExternalLink className="h-4 w-4" /> Testar Link
+        </a>
+      </div>
+      {showError ? (
+        <p className="mt-1 text-xs text-destructive">
+          Link inválido. Use o formato https://wa.me/... ou https://api.whatsapp.com/...
+        </p>
+      ) : (
+        <p className="mt-1 text-xs text-muted-foreground">
+          Cole o link completo. Aceitos: https://wa.me/&lt;número&gt; ou https://api.whatsapp.com/send?phone=&lt;número&gt;
+        </p>
+      )}
+    </Field>
+  );
+}
+
 /* ---------------- Products ---------------- */
 
 function ProductsAdmin() {
