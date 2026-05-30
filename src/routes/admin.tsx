@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2, RotateCcw, LogOut } from "lucide-react";
+import { Pencil, Plus, Trash2, RotateCcw, LogOut, ExternalLink } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { dataApi, useData, formatPrice } from "@/lib/store";
+import { dataApi, useData, formatPrice, isValidWhatsappLink } from "@/lib/store";
 import type { Banner, Category, Product, Service, Store } from "@/data/seed";
 
 const AUTH_KEY = "serrana-admin-auth";
