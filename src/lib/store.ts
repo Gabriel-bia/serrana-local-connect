@@ -20,7 +20,7 @@ type DataShape = {
   banners: Banner[];
 };
 
-const KEY = "serrana-express-data-v1";
+const KEY = "serrana-express-data-v2";
 
 function loadInitial(): DataShape {
   if (typeof window === "undefined") {
