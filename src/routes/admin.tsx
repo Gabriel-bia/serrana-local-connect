@@ -267,7 +267,14 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
   const [p, setP] = useState<Product>(initial);
   return (
     <form
-      onSubmit={(e) => { e.preventDefault(); onSave(p); }}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!isValidWhatsappLink(p.whatsapp.trim())) {
+          alert("Informe um Link do WhatsApp válido (https://wa.me/... ou https://api.whatsapp.com/...).");
+          return;
+        }
+        onSave({ ...p, whatsapp: p.whatsapp.trim() });
+      }}
       className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit sticky top-20"
     >
       <h3 className="font-semibold">{p.id ? "Editar produto" : "Novo produto"}</h3>
