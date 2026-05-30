@@ -343,7 +343,14 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
   const { categories } = useData();
   const [s, setS] = useState<Store>(initial);
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSave(s); }} className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit sticky top-20">
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      if (!isValidWhatsappLink(s.whatsapp.trim())) {
+        alert("Informe um Link do WhatsApp válido (https://wa.me/... ou https://api.whatsapp.com/...).");
+        return;
+      }
+      onSave({ ...s, whatsapp: s.whatsapp.trim() });
+    }} className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit sticky top-20">
       <h3 className="font-semibold">{s.id ? "Editar loja" : "Nova loja"}</h3>
       <Field label="Nome"><input className={inputClass} value={s.name} onChange={(e) => setS({ ...s, name: e.target.value })} required /></Field>
       <Field label="Logo (URL)"><input className={inputClass} value={s.logo} onChange={(e) => setS({ ...s, logo: e.target.value })} required /></Field>
