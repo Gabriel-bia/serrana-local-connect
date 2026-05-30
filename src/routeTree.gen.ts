@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as LojaIdRouteImport } from './routes/loja.$id'
@@ -18,6 +19,11 @@ import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 const CategoriasRoute = CategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +49,7 @@ const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/categorias': typeof CategoriasRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/categorias': typeof CategoriasRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/categorias': typeof CategoriasRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
@@ -67,15 +76,23 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/categorias'
     | '/categoria/$slug'
     | '/loja/$id'
     | '/produto/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/categorias' | '/categoria/$slug' | '/loja/$id' | '/produto/$id'
+  to:
+    | '/'
+    | '/admin'
+    | '/categorias'
+    | '/categoria/$slug'
+    | '/loja/$id'
+    | '/produto/$id'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/categorias'
     | '/categoria/$slug'
     | '/loja/$id'
@@ -84,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   CategoriasRoute: typeof CategoriasRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
   LojaIdRoute: typeof LojaIdRoute
@@ -97,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/categorias'
       fullPath: '/categorias'
       preLoaderRoute: typeof CategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -132,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   CategoriasRoute: CategoriasRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
   LojaIdRoute: LojaIdRoute,
@@ -140,3 +166,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
