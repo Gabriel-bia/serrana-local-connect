@@ -289,7 +289,7 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
         <Field label="Categoria"><select className={inputClass} value={p.categoryId} onChange={(e) => setP({ ...p, categoryId: e.target.value })}>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
         <Field label="Loja"><select className={inputClass} value={p.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setP({ ...p, storeId: e.target.value, whatsapp: st?.whatsapp ?? p.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
       </div>
-      <Field label="WhatsApp (com DDI)"><input className={inputClass} value={p.whatsapp} onChange={(e) => setP({ ...p, whatsapp: e.target.value })} placeholder="5535999990000" required /></Field>
+      <WhatsAppLinkField value={p.whatsapp} onChange={(v) => setP({ ...p, whatsapp: v })} />
       <Field label="Link externo (opcional)"><input className={inputClass} value={p.externalLink ?? ""} onChange={(e) => setP({ ...p, externalLink: e.target.value })} /></Field>
       <div className="flex gap-2 pt-2">
         <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground hover:opacity-90">Salvar</button>
