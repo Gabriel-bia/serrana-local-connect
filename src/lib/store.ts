@@ -106,10 +106,41 @@ export const dataApi = {
   },
 };
 
-export function whatsappLink(number: string, message?: string) {
-  const clean = number.replace(/\D/g, "");
-  const m = message ? `?text=${encodeURIComponent(message)}` : "";
-  return `https://wa.me/${clean}${m}`;
+/**
+ * Valida se uma string é um link oficial do WhatsApp.
+ */
+export function isValidWhatsappLink(value: string): boolean {
+  if (!value) return false;
+  const v = value.trim();
+  return v.startsWith("https://wa.me/") || v.startsWith("https://api.whatsapp.com/");
+}
+
+/**
+ * Recebe o valor salvo (link completo do WhatsApp colado pelo admin) e
+ * devolve uma URL pronta para uso, opcionalmente adicionando uma mensagem.
+ * Mantém compatibilidade com dados antigos que armazenavam apenas números.
+ */
+export function buildWhatsappLink(stored: string, message?: string): string {
+  if (!stored) return "#";
+  const raw = stored.trim();
+
+  let url: URL;
+  try {
+    if (isValidWhatsappLink(raw)) {
+      url = new URL(raw);
+    } else {
+      // Compat: valor antigo era apenas o número.
+      const digits = raw.replace(/\D/g, "");
+      url = new URL(`https://wa.me/${digits}`);
+    }
+  } catch {
+    return raw;
+  }
+
+  if (message && !url.searchParams.has("text")) {
+    url.searchParams.set("text", message);
+  }
+  return url.toString();
 }
 
 export function formatPrice(n: number) {
