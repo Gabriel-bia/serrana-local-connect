@@ -360,7 +360,7 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
         <Field label="Categoria"><select className={inputClass} value={s.categoryId} onChange={(e) => setS({ ...s, categoryId: e.target.value })}>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
         <Field label="Destaque"><select className={inputClass} value={s.featured ? "1" : "0"} onChange={(e) => setS({ ...s, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
       </div>
-      <Field label="WhatsApp"><input className={inputClass} value={s.whatsapp} onChange={(e) => setS({ ...s, whatsapp: e.target.value })} required placeholder="5535999990000" /></Field>
+      <WhatsAppLinkField value={s.whatsapp} onChange={(v) => setS({ ...s, whatsapp: v })} />
       <Field label="Instagram (sem @)"><input className={inputClass} value={s.instagram ?? ""} onChange={(e) => setS({ ...s, instagram: e.target.value })} /></Field>
       <Field label="Endereço (opcional)"><input className={inputClass} value={s.address ?? ""} onChange={(e) => setS({ ...s, address: e.target.value })} /></Field>
       <div className="flex gap-2 pt-2">
