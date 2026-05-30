@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2, RotateCcw, LogOut } from "lucide-react";
+import { Pencil, Plus, Trash2, RotateCcw, LogOut, ExternalLink } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { dataApi, useData, formatPrice } from "@/lib/store";
+import { dataApi, useData, formatPrice, isValidWhatsappLink } from "@/lib/store";
 import type { Banner, Category, Product, Service, Store } from "@/data/seed";
 
 const AUTH_KEY = "serrana-admin-auth";
@@ -147,6 +147,62 @@ function newId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
+/**
+ * Campo de Link do WhatsApp com validação e botão "Testar Link".
+ * O administrador cola o link completo (https://wa.me/... ou https://api.whatsapp.com/...).
+ */
+function WhatsAppLinkField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const trimmed = value.trim();
+  const isValid = isValidWhatsappLink(trimmed);
+  const showError = trimmed.length > 0 && !isValid;
+
+  return (
+    <Field label="Link do WhatsApp">
+      <div className="flex gap-2">
+        <input
+          type="url"
+          className={`${inputClass} ${showError ? "border-destructive focus:ring-destructive" : ""}`}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://wa.me/5535999990000"
+          required
+        />
+        <a
+          href={isValid ? trimmed : undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => {
+            if (!isValid) {
+              e.preventDefault();
+              alert("Cole um link válido começando com https://wa.me/ ou https://api.whatsapp.com/");
+            }
+          }}
+          className={`inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition ${
+            isValid ? "hover:bg-muted text-foreground" : "opacity-60 cursor-not-allowed"
+          }`}
+        >
+          <ExternalLink className="h-4 w-4" /> Testar Link
+        </a>
+      </div>
+      {showError ? (
+        <p className="mt-1 text-xs text-destructive">
+          Link inválido. Use o formato https://wa.me/... ou https://api.whatsapp.com/...
+        </p>
+      ) : (
+        <p className="mt-1 text-xs text-muted-foreground">
+          Cole o link completo. Aceitos: https://wa.me/&lt;número&gt; ou https://api.whatsapp.com/send?phone=&lt;número&gt;
+        </p>
+      )}
+    </Field>
+  );
+}
+
 /* ---------------- Products ---------------- */
 
 function ProductsAdmin() {
@@ -211,7 +267,14 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
   const [p, setP] = useState<Product>(initial);
   return (
     <form
-      onSubmit={(e) => { e.preventDefault(); onSave(p); }}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!isValidWhatsappLink(p.whatsapp.trim())) {
+          alert("Informe um Link do WhatsApp válido (https://wa.me/... ou https://api.whatsapp.com/...).");
+          return;
+        }
+        onSave({ ...p, whatsapp: p.whatsapp.trim() });
+      }}
       className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit sticky top-20"
     >
       <h3 className="font-semibold">{p.id ? "Editar produto" : "Novo produto"}</h3>
@@ -226,7 +289,7 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
         <Field label="Categoria"><select className={inputClass} value={p.categoryId} onChange={(e) => setP({ ...p, categoryId: e.target.value })}>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
         <Field label="Loja"><select className={inputClass} value={p.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setP({ ...p, storeId: e.target.value, whatsapp: st?.whatsapp ?? p.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
       </div>
-      <Field label="WhatsApp (com DDI)"><input className={inputClass} value={p.whatsapp} onChange={(e) => setP({ ...p, whatsapp: e.target.value })} placeholder="5535999990000" required /></Field>
+      <WhatsAppLinkField value={p.whatsapp} onChange={(v) => setP({ ...p, whatsapp: v })} />
       <Field label="Link externo (opcional)"><input className={inputClass} value={p.externalLink ?? ""} onChange={(e) => setP({ ...p, externalLink: e.target.value })} /></Field>
       <div className="flex gap-2 pt-2">
         <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground hover:opacity-90">Salvar</button>
@@ -280,7 +343,14 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
   const { categories } = useData();
   const [s, setS] = useState<Store>(initial);
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSave(s); }} className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit sticky top-20">
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      if (!isValidWhatsappLink(s.whatsapp.trim())) {
+        alert("Informe um Link do WhatsApp válido (https://wa.me/... ou https://api.whatsapp.com/...).");
+        return;
+      }
+      onSave({ ...s, whatsapp: s.whatsapp.trim() });
+    }} className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit sticky top-20">
       <h3 className="font-semibold">{s.id ? "Editar loja" : "Nova loja"}</h3>
       <Field label="Nome"><input className={inputClass} value={s.name} onChange={(e) => setS({ ...s, name: e.target.value })} required /></Field>
       <Field label="Logo (URL)"><input className={inputClass} value={s.logo} onChange={(e) => setS({ ...s, logo: e.target.value })} required /></Field>
@@ -290,7 +360,7 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
         <Field label="Categoria"><select className={inputClass} value={s.categoryId} onChange={(e) => setS({ ...s, categoryId: e.target.value })}>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
         <Field label="Destaque"><select className={inputClass} value={s.featured ? "1" : "0"} onChange={(e) => setS({ ...s, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
       </div>
-      <Field label="WhatsApp"><input className={inputClass} value={s.whatsapp} onChange={(e) => setS({ ...s, whatsapp: e.target.value })} required placeholder="5535999990000" /></Field>
+      <WhatsAppLinkField value={s.whatsapp} onChange={(v) => setS({ ...s, whatsapp: v })} />
       <Field label="Instagram (sem @)"><input className={inputClass} value={s.instagram ?? ""} onChange={(e) => setS({ ...s, instagram: e.target.value })} /></Field>
       <Field label="Endereço (opcional)"><input className={inputClass} value={s.address ?? ""} onChange={(e) => setS({ ...s, address: e.target.value })} /></Field>
       <div className="flex gap-2 pt-2">
@@ -384,7 +454,15 @@ function ServicesAdmin() {
       {editing && (
         <form
           key={editing.id || "new"}
-          onSubmit={(e) => { e.preventDefault(); dataApi.upsert("services", { ...editing, id: editing.id || newId() }); setEditing(null); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!isValidWhatsappLink(editing.whatsapp.trim())) {
+              alert("Informe um Link do WhatsApp válido (https://wa.me/... ou https://api.whatsapp.com/...).");
+              return;
+            }
+            dataApi.upsert("services", { ...editing, whatsapp: editing.whatsapp.trim(), id: editing.id || newId() });
+            setEditing(null);
+          }}
           className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit"
         >
           <h3 className="font-semibold">{editing.id ? "Editar serviço" : "Novo serviço"}</h3>
@@ -392,7 +470,7 @@ function ServicesAdmin() {
           <Field label="Imagem (URL)"><input className={inputClass} value={editing.image} onChange={(e) => setEditing({ ...editing, image: e.target.value })} required /></Field>
           <Field label="Descrição"><textarea className={inputClass} rows={3} value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
           <Field label="Loja"><select className={inputClass} value={editing.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setEditing({ ...editing, storeId: e.target.value, whatsapp: st?.whatsapp ?? editing.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
-          <Field label="WhatsApp"><input className={inputClass} value={editing.whatsapp} onChange={(e) => setEditing({ ...editing, whatsapp: e.target.value })} required /></Field>
+          <WhatsAppLinkField value={editing.whatsapp} onChange={(v) => setEditing({ ...editing, whatsapp: v })} />
           <Field label="Destaque"><select className={inputClass} value={editing.featured ? "1" : "0"} onChange={(e) => setEditing({ ...editing, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
           <div className="flex gap-2 pt-2">
             <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
