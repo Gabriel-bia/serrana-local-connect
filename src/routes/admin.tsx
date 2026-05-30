@@ -470,7 +470,7 @@ function ServicesAdmin() {
           <Field label="Imagem (URL)"><input className={inputClass} value={editing.image} onChange={(e) => setEditing({ ...editing, image: e.target.value })} required /></Field>
           <Field label="Descrição"><textarea className={inputClass} rows={3} value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
           <Field label="Loja"><select className={inputClass} value={editing.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setEditing({ ...editing, storeId: e.target.value, whatsapp: st?.whatsapp ?? editing.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
-          <Field label="WhatsApp"><input className={inputClass} value={editing.whatsapp} onChange={(e) => setEditing({ ...editing, whatsapp: e.target.value })} required /></Field>
+          <WhatsAppLinkField value={editing.whatsapp} onChange={(v) => setEditing({ ...editing, whatsapp: v })} />
           <Field label="Destaque"><select className={inputClass} value={editing.featured ? "1" : "0"} onChange={(e) => setEditing({ ...editing, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
           <div className="flex gap-2 pt-2">
             <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
