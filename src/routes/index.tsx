@@ -111,7 +111,7 @@ function Index() {
                 <h3 className="font-semibold">{sv.name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{sv.description}</p>
                 <div className="mt-4">
-                  <WhatsAppButton number={sv.whatsapp} message={`Olá! Tenho interesse no serviço "${sv.name}".`} className="w-full" />
+                  <WhatsAppButton link={sv.whatsapp} message={`Olá! Tenho interesse no serviço "${sv.name}".`} className="w-full" />
                 </div>
               </div>
             </div>
