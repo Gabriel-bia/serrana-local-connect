@@ -454,7 +454,15 @@ function ServicesAdmin() {
       {editing && (
         <form
           key={editing.id || "new"}
-          onSubmit={(e) => { e.preventDefault(); dataApi.upsert("services", { ...editing, id: editing.id || newId() }); setEditing(null); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!isValidWhatsappLink(editing.whatsapp.trim())) {
+              alert("Informe um Link do WhatsApp válido (https://wa.me/... ou https://api.whatsapp.com/...).");
+              return;
+            }
+            dataApi.upsert("services", { ...editing, whatsapp: editing.whatsapp.trim(), id: editing.id || newId() });
+            setEditing(null);
+          }}
           className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit"
         >
           <h3 className="font-semibold">{editing.id ? "Editar serviço" : "Novo serviço"}</h3>
