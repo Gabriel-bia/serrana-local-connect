@@ -16,6 +16,7 @@ export type Store = {
   instagram?: string;
   address?: string;
   featured: boolean;
+  blocked?: boolean;
 };
 
 export type Product = {
