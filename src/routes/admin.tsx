@@ -383,25 +383,51 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
 function StoresAdmin() {
   const { stores, categories } = useData();
   const [editing, setEditing] = useState<Store | null>(null);
-  const blank: Store = { id: "", name: "", logo: "", banner: "", description: "", categoryId: categories[0]?.id ?? "", whatsapp: "", instagram: "", address: "", featured: false };
+  const blank: Store = { id: "", name: "", logo: "", banner: "", description: "", categoryId: categories[0]?.id ?? "", whatsapp: "", instagram: "", address: "", featured: false, blocked: false };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
-            <tr><th className="p-3">Loja</th><th className="p-3">Categoria</th><th className="p-3">WhatsApp</th><th className="p-3">Destaque</th><th></th></tr>
+            <tr><th className="p-3">Loja</th><th className="p-3 hidden sm:table-cell">Categoria</th><th className="p-3">Status</th><th className="p-3"></th></tr>
           </thead>
           <tbody>
             {stores.map((s) => (
               <tr key={s.id} className="border-t border-border">
-                <td className="p-3"><div className="flex items-center gap-2"><img src={s.logo} className="h-10 w-10 rounded object-cover" alt="" /><span>{s.name}</span></div></td>
-                <td className="p-3 text-muted-foreground">{categories.find((c) => c.id === s.categoryId)?.name}</td>
-                <td className="p-3">{s.whatsapp}</td>
-                <td className="p-3">{s.featured ? "Sim" : "Não"}</td>
-                <td className="p-3 text-right">
-                  <button onClick={() => setEditing(s)} className="mr-2 text-primary"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => confirm("Excluir loja?") && dataApi.remove("stores", s.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                <td className="p-3">
+                  <div className="flex items-center gap-2">
+                    <img src={s.logo} className="h-10 w-10 rounded object-cover" alt="" />
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{s.name}</div>
+                      <div className="text-xs text-muted-foreground sm:hidden">{categories.find((c) => c.id === s.categoryId)?.name}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="p-3 hidden sm:table-cell text-muted-foreground">{categories.find((c) => c.id === s.categoryId)?.name}</td>
+                <td className="p-3">
+                  <div className="flex flex-wrap gap-1">
+                    {s.featured && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Destaque</span>}
+                    {s.blocked
+                      ? <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive"><Lock className="h-3 w-3" />Bloqueada</span>
+                      : <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600"><Unlock className="h-3 w-3" />Ativa</span>}
+                  </div>
+                </td>
+                <td className="p-3 text-right whitespace-nowrap">
+                  <button
+                    onClick={() => dataApi.upsert("stores", { ...s, blocked: !s.blocked })}
+                    className="mr-2 inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium hover:bg-muted"
+                    title={s.blocked ? "Desbloquear loja" : "Bloquear loja"}
+                  >
+                    {s.blocked ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                    <span className="hidden sm:inline">{s.blocked ? "Desbloquear" : "Bloquear"}</span>
+                  </button>
+                  <button onClick={() => setEditing(s)} className="mr-2 inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-primary hover:bg-muted">
+                    <Pencil className="h-3.5 w-3.5" /><span className="hidden sm:inline">Editar</span>
+                  </button>
+                  <button onClick={() => confirm("Excluir loja?") && dataApi.remove("stores", s.id)} className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-destructive hover:bg-muted">
+                    <Trash2 className="h-3.5 w-3.5" /><span className="hidden sm:inline">Excluir</span>
+                  </button>
                 </td>
               </tr>
             ))}
@@ -412,15 +438,35 @@ function StoresAdmin() {
         </div>
       </div>
       {editing && (
-        <StoreForm key={editing.id || "new"} initial={editing} onCancel={() => setEditing(null)} onSave={(s) => { dataApi.upsert("stores", { ...s, id: s.id || newId() }); setEditing(null); }} />
+        <StoreForm key={editing.id || "new"} initial={editing} onCancel={() => setEditing(null)} onSave={(s, linkedIds) => {
+          const id = s.id || newId();
+          dataApi.upsert("stores", { ...s, id });
+          // Atualiza vínculo dos produtos selecionados.
+          const current = dataApi.get().products;
+          for (const prod of current) {
+            const shouldLink = linkedIds.includes(prod.id);
+            if (shouldLink && prod.storeId !== id) {
+              dataApi.upsert("products", { ...prod, storeId: id, whatsapp: s.whatsapp || prod.whatsapp });
+            }
+          }
+          setEditing(null);
+        }} />
       )}
     </div>
   );
 }
 
-function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: Store) => void; onCancel: () => void }) {
-  const { categories } = useData();
+function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: Store, linkedProductIds: string[]) => void; onCancel: () => void }) {
+  const { categories, products } = useData();
   const [s, setS] = useState<Store>(initial);
+  const [linkedIds, setLinkedIds] = useState<string[]>(
+    () => products.filter((p) => p.storeId === initial.id).map((p) => p.id),
+  );
+
+  function toggleLink(id: string) {
+    setLinkedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
@@ -428,20 +474,38 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
         alert("Informe um Link do WhatsApp válido (https://wa.me/... ou https://api.whatsapp.com/...).");
         return;
       }
-      onSave({ ...s, whatsapp: s.whatsapp.trim() });
-    }} className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit sticky top-20">
+      onSave({ ...s, whatsapp: s.whatsapp.trim() }, linkedIds);
+    }} className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
       <h3 className="font-semibold">{s.id ? "Editar loja" : "Nova loja"}</h3>
-      <Field label="Nome"><input className={inputClass} value={s.name} onChange={(e) => setS({ ...s, name: e.target.value })} required /></Field>
-      <Field label="Logo (URL)"><input className={inputClass} value={s.logo} onChange={(e) => setS({ ...s, logo: e.target.value })} required /></Field>
-      <Field label="Banner (URL)"><input className={inputClass} value={s.banner} onChange={(e) => setS({ ...s, banner: e.target.value })} required /></Field>
-      <Field label="Descrição"><textarea className={inputClass} rows={3} value={s.description} onChange={(e) => setS({ ...s, description: e.target.value })} /></Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Categoria"><select className={inputClass} value={s.categoryId} onChange={(e) => setS({ ...s, categoryId: e.target.value })}>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
-        <Field label="Destaque"><select className={inputClass} value={s.featured ? "1" : "0"} onChange={(e) => setS({ ...s, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
-      </div>
+      <Field label="Nome da loja"><input className={inputClass} value={s.name} onChange={(e) => setS({ ...s, name: e.target.value })} required /></Field>
+      <Field label="Categoria"><select className={inputClass} value={s.categoryId} onChange={(e) => setS({ ...s, categoryId: e.target.value })}>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
       <WhatsAppLinkField value={s.whatsapp} onChange={(v) => setS({ ...s, whatsapp: v })} />
       <Field label="Instagram (sem @)"><input className={inputClass} value={s.instagram ?? ""} onChange={(e) => setS({ ...s, instagram: e.target.value })} /></Field>
+      <Field label="Descrição"><textarea className={inputClass} rows={3} value={s.description} onChange={(e) => setS({ ...s, description: e.target.value })} /></Field>
+      <ImageUploadField label="Logo da loja" value={s.logo} onChange={(v) => setS({ ...s, logo: v })} required />
+      <ImageUploadField label="Banner da loja" value={s.banner} onChange={(v) => setS({ ...s, banner: v })} required />
       <Field label="Endereço (opcional)"><input className={inputClass} value={s.address ?? ""} onChange={(e) => setS({ ...s, address: e.target.value })} /></Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Destaque"><select className={inputClass} value={s.featured ? "1" : "0"} onChange={(e) => setS({ ...s, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
+        <Field label="Status"><select className={inputClass} value={s.blocked ? "1" : "0"} onChange={(e) => setS({ ...s, blocked: e.target.value === "1" })}><option value="0">Ativa (visível)</option><option value="1">Bloqueada (oculta)</option></select></Field>
+      </div>
+
+      <div>
+        <span className="text-xs font-medium text-muted-foreground">Produtos vinculados à loja</span>
+        <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-background p-2 space-y-1">
+          {products.length === 0 && <p className="text-xs text-muted-foreground p-2">Nenhum produto cadastrado ainda.</p>}
+          {products.map((p) => (
+            <label key={p.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-muted cursor-pointer">
+              <input type="checkbox" checked={linkedIds.includes(p.id)} onChange={() => toggleLink(p.id)} />
+              <img src={p.image} className="h-6 w-6 rounded object-cover" alt="" />
+              <span className="flex-1 truncate">{p.name}</span>
+              <span className="text-xs text-muted-foreground">{formatPrice(p.price)}</span>
+            </label>
+          ))}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">Selecione os produtos que pertencem a esta loja.</p>
+      </div>
+
       <div className="flex gap-2 pt-2">
         <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
         <button type="button" onClick={onCancel} className="rounded-lg border border-border px-3 py-2 font-medium">Cancelar</button>
