@@ -25,9 +25,9 @@ export const Route = createFileRoute("/")({
 const shortcuts = [
   { icon: ShoppingBag, label: "Produtos", href: "/categorias" },
   { icon: StoreIcon, label: "Lojas", href: "/categorias" },
-  { icon: Wrench, label: "Serviços", href: "/categoria/$slug", slug: "servicos" },
+  { icon: Wrench, label: "Serviços", href: "/categoria/servicos" },
   { icon: MapPin, label: "Perto de Você", href: "/categorias" },
-] as const;
+];
 
 function Index() {
   const { categories, stores: allStores, products: allProducts, services: allServices } = useData();
@@ -100,10 +100,9 @@ function Index() {
         <div className="container mx-auto px-4 pb-8 md:pb-12">
           <div className="grid grid-cols-4 gap-2 sm:gap-4">
             {shortcuts.map((s) => (
-              <Link
+              <a
                 key={s.label}
-                to={s.href as "/categorias"}
-                {...("slug" in s ? { params: { slug: s.slug } } : {})}
+                href={s.href}
                 className="flex flex-col items-center gap-2 text-center"
               >
                 <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-primary shadow-[var(--shadow-card)] ring-1 ring-primary/20 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-glow)] sm:h-16 sm:w-16">
@@ -112,7 +111,7 @@ function Index() {
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-white sm:text-xs">
                   {s.label}
                 </span>
-              </Link>
+              </a>
             ))}
           </div>
         </div>
