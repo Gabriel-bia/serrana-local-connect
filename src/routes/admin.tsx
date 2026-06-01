@@ -358,7 +358,7 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
     >
       <h3 className="font-semibold">{p.id ? "Editar produto" : "Novo produto"}</h3>
       <Field label="Nome"><input className={inputClass} value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} required /></Field>
-      <Field label="Foto (URL)"><input className={inputClass} value={p.image} onChange={(e) => setP({ ...p, image: e.target.value })} required /></Field>
+      <ImageUploadField label="Foto do produto" value={p.image} onChange={(v) => setP({ ...p, image: v })} required />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Preço (R$)"><input type="number" step="0.01" className={inputClass} value={p.price} onChange={(e) => setP({ ...p, price: Number(e.target.value) })} required /></Field>
         <Field label="Destaque"><select className={inputClass} value={p.featured ? "1" : "0"} onChange={(e) => setP({ ...p, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
