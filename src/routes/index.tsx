@@ -139,7 +139,7 @@ function Index() {
 
       {/* Serviços em destaque */}
       <section className="container mx-auto px-4 py-8">
-        <SectionHeader icon={Briefcase} title="Serviços em destaque" link="/categoria/$slug" linkLabel="Ver todos" />
+        <SectionHeader icon={Briefcase} title="Serviços em destaque" link="/categoria/servicos" linkLabel="Ver todos" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {featuredServices.map((sv) => (
             <div
