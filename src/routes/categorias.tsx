@@ -25,11 +25,14 @@ export const Route = createFileRoute("/categorias")({
 });
 
 function CategoriasPage() {
-  const { categories, products, stores } = useData();
+  const { categories, products: allProducts, stores: allStores } = useData();
   const search = useSearch({ from: "/categorias" });
   const [q, setQ] = useState(search.q);
   const [cat, setCat] = useState(search.cat);
 
+  const stores = useMemo(() => allStores.filter((s) => !s.blocked), [allStores]);
+  const visibleIds = useMemo(() => new Set(stores.map((s) => s.id)), [stores]);
+  const products = useMemo(() => allProducts.filter((p) => visibleIds.has(p.storeId)), [allProducts, visibleIds]);
   const storeById = useMemo(() => Object.fromEntries(stores.map((s) => [s.id, s])), [stores]);
 
   const filtered = useMemo(() => {
@@ -45,7 +48,7 @@ function CategoriasPage() {
         categories.find((c) => c.id === p.categoryId)?.name.toLowerCase().includes(term);
       return cmatch && tmatch;
     });
-  }, [q, cat, products, stores, categories, storeById]);
+  }, [q, cat, products, categories, storeById]);
 
   return (
     <div className="min-h-screen flex flex-col">
