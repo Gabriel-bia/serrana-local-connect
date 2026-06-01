@@ -146,3 +146,8 @@ export function buildWhatsappLink(stored: string, message?: string): string {
 export function formatPrice(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
+
+/** Lojas visíveis para o público (não bloqueadas). */
+export function isStoreVisible(store: { blocked?: boolean }): boolean {
+  return !store.blocked;
+}
