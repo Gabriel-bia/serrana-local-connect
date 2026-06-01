@@ -17,7 +17,7 @@ function LojaPage() {
   const { id } = Route.useParams();
   const { stores, products } = useData();
   const store = stores.find((s) => s.id === id);
-  if (!store) throw notFound();
+  if (!store || store.blocked) throw notFound();
   const list = products.filter((p) => p.storeId === store.id);
 
   return (
