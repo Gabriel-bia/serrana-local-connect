@@ -206,9 +206,9 @@ function SectionHeader({
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold">{title}</h2>
       </div>
       {link && (
-        <Link to={link as "/categorias"} className="text-sm font-semibold text-primary hover:underline">
+        <a href={link} className="text-sm font-semibold text-primary hover:underline">
           {linkLabel}
-        </Link>
+        </a>
       )}
     </div>
   );
