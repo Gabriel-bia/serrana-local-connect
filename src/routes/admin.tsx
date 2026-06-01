@@ -40,7 +40,7 @@ function AdminPage() {
                 sessionStorage.setItem(AUTH_KEY, "1");
                 setAuthed(true);
               } else {
-                alert("Senha incorreta. (Dica: admin123)");
+                alert("Senha incorreta.");
               }
             }}
             className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]"
@@ -52,12 +52,12 @@ function AdminPage() {
               value={pass}
               onChange={(e) => setPass(e.target.value)}
               placeholder="Senha"
+              autoComplete="current-password"
               className="mt-4 w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <button className="mt-3 w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90">
               Entrar
             </button>
-            <p className="mt-3 text-xs text-muted-foreground">Senha padrão: <code>admin123</code></p>
           </form>
         </main>
         <Footer />
