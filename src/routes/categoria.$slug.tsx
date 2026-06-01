@@ -16,8 +16,10 @@ function CategoriaPage() {
   const { categories, products, stores } = useData();
   const category = categories.find((c) => c.slug === slug);
   if (!category) throw notFound();
-  const list = products.filter((p) => p.categoryId === category.id);
-  const storeById = Object.fromEntries(stores.map((s) => [s.id, s]));
+  const visibleStores = stores.filter((s) => !s.blocked);
+  const visibleIds = new Set(visibleStores.map((s) => s.id));
+  const list = products.filter((p) => p.categoryId === category.id && visibleIds.has(p.storeId));
+  const storeById = Object.fromEntries(visibleStores.map((s) => [s.id, s]));
 
   return (
     <div className="min-h-screen flex flex-col">
