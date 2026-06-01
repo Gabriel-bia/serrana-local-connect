@@ -663,7 +663,7 @@ function BannersAdmin() {
           <h3 className="font-semibold">{editing.id ? "Editar banner" : "Novo banner"}</h3>
           <Field label="Título"><input className={inputClass} value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} required /></Field>
           <Field label="Subtítulo"><input className={inputClass} value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} /></Field>
-          <Field label="Imagem (URL)"><input className={inputClass} value={editing.image} onChange={(e) => setEditing({ ...editing, image: e.target.value })} /></Field>
+          <ImageUploadField label="Imagem do banner" value={editing.image} onChange={(v) => setEditing({ ...editing, image: v })} />
           <Field label="Link (opcional)"><input className={inputClass} value={editing.link ?? ""} onChange={(e) => setEditing({ ...editing, link: e.target.value })} /></Field>
           <div className="flex gap-2 pt-2">
             <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
