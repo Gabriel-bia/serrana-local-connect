@@ -203,6 +203,85 @@ function WhatsAppLinkField({
   );
 }
 
+/**
+ * Campo de upload de imagem com prévia. Aceita URL colada ou arquivo da galeria.
+ * Arquivos são lidos como data URL (base64) — útil para previews locais.
+ */
+function ImageUploadField({
+  label,
+  value,
+  onChange,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+}) {
+  const inputId = useId();
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function handleFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      alert("Selecione um arquivo de imagem.");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      alert("Imagem muito grande (máximo 4MB).");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => onChange(String(reader.result));
+    reader.readAsDataURL(file);
+  }
+
+  return (
+    <Field label={label}>
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <input
+            id={inputId}
+            type="text"
+            className={inputClass}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Cole uma URL ou envie da galeria"
+            required={required}
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted"
+          >
+            <Upload className="h-4 w-4" /> Galeria
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+              e.target.value = "";
+            }}
+          />
+        </div>
+        {value ? (
+          <img
+            src={value}
+            alt="Prévia"
+            className="h-24 w-24 rounded-lg border border-border object-cover"
+            onError={(e) => ((e.currentTarget.style.display = "none"))}
+          />
+        ) : (
+          <p className="text-xs text-muted-foreground">Nenhuma imagem selecionada.</p>
+        )}
+      </div>
+    </Field>
+  );
+}
+
 /* ---------------- Products ---------------- */
 
 function ProductsAdmin() {
