@@ -18,6 +18,7 @@ function ProdutoPage() {
   const product = products.find((p) => p.id === id);
   if (!product) throw notFound();
   const store = stores.find((s) => s.id === product.storeId);
+  if (!store || store.blocked) throw notFound();
   const category = categories.find((c) => c.id === product.categoryId);
 
   return (
