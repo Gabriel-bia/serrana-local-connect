@@ -610,7 +610,7 @@ function ServicesAdmin() {
         >
           <h3 className="font-semibold">{editing.id ? "Editar serviço" : "Novo serviço"}</h3>
           <Field label="Nome"><input className={inputClass} value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} required /></Field>
-          <Field label="Imagem (URL)"><input className={inputClass} value={editing.image} onChange={(e) => setEditing({ ...editing, image: e.target.value })} required /></Field>
+          <ImageUploadField label="Imagem do serviço" value={editing.image} onChange={(v) => setEditing({ ...editing, image: v })} required />
           <Field label="Descrição"><textarea className={inputClass} rows={3} value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
           <Field label="Loja"><select className={inputClass} value={editing.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setEditing({ ...editing, storeId: e.target.value, whatsapp: st?.whatsapp ?? editing.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
           <WhatsAppLinkField value={editing.whatsapp} onChange={(v) => setEditing({ ...editing, whatsapp: v })} />
