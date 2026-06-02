@@ -7,7 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { StoreCard } from "@/components/StoreCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { useData } from "@/lib/store";
-import heroBanner from "@/assets/hero-banner-serrana.png.asset.json";
+import heroBanner from "@/assets/hero-banner-serrana-v2.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
