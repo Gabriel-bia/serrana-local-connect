@@ -46,40 +46,26 @@ function Index() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
+      {/* Hero - Banner image (já contém marca, texto e CTAs) */}
+      <section className="relative bg-white">
+        <a href="/categorias" className="block">
           <img
             src={heroBanner.url}
-            alt="Serrana Express - sua cidade conectada"
-            className="h-full w-full object-cover"
+            alt="Serrana Express — Encontre produtos e serviços da sua cidade em um só lugar"
+            className="w-full h-auto object-cover"
             width={1600}
             height={900}
           />
-          {/* Degradê laranja escuro para leitura */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.45_0.18_40)]/95 via-[oklch(0.55_0.2_42)]/70 to-[oklch(0.25_0.05_30)]/50 md:from-[oklch(0.45_0.18_40)]/90 md:via-[oklch(0.5_0.2_42)]/55 md:to-transparent" />
-        </div>
+        </a>
 
-        <div className="container mx-auto px-4 pt-8 pb-6 md:pt-16 md:pb-12">
-          <div className="max-w-2xl text-white">
-            <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white ring-1 ring-white/30 backdrop-blur">
-              Sua cidade, conectada
-            </span>
-            <h1 className="mt-4 text-3xl sm:text-4xl md:text-6xl font-extrabold leading-tight drop-shadow-md">
-              Encontre produtos e serviços da sua cidade em um só lugar
-            </h1>
-            <p className="mt-3 text-sm sm:text-base md:text-lg text-white/90 max-w-xl">
-              Descubra lojas locais, compare produtos e fale direto pelo WhatsApp. Simples, rápido e sem complicação.
-            </p>
-          </div>
-
-          {/* Search */}
+        {/* Search */}
+        <div className="container mx-auto px-4 -mt-4 md:-mt-8 relative z-10">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               window.location.href = `/categorias?q=${encodeURIComponent(q)}`;
             }}
-            className="mt-6 flex w-full items-center gap-2 rounded-full bg-white p-1.5 shadow-[var(--shadow-glow)] md:max-w-2xl"
+            className="flex w-full items-center gap-2 rounded-full bg-white p-1.5 shadow-[var(--shadow-glow)] ring-1 ring-primary/10 md:max-w-2xl md:mx-auto"
           >
             <Search className="ml-3 h-5 w-5 shrink-0 text-muted-foreground" />
             <input
@@ -97,7 +83,7 @@ function Index() {
         </div>
 
         {/* Shortcuts */}
-        <div className="container mx-auto px-4 pb-8 md:pb-12">
+        <div className="container mx-auto px-4 pt-6 pb-8 md:pb-12">
           <div className="grid grid-cols-4 gap-2 sm:gap-4">
             {shortcuts.map((s) => (
               <a
@@ -108,7 +94,7 @@ function Index() {
                 <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-primary shadow-[var(--shadow-card)] ring-1 ring-primary/20 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-glow)] sm:h-16 sm:w-16">
                   <s.icon className="h-6 w-6 sm:h-7 sm:w-7" />
                 </span>
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-white sm:text-xs">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-foreground sm:text-xs">
                   {s.label}
                 </span>
               </a>
