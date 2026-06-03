@@ -46,11 +46,14 @@ function ProdutoPage() {
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <WhatsAppButton
-                link={product.whatsapp}
+                link={product.whatsapp || store.whatsapp}
+                storeId={store.id}
+                storeName={store.name}
                 message={`Olá! Tenho interesse no produto "${product.name}".`}
                 label="Falar com a loja"
                 className="w-full"
               />
+
               {store && (
                 <Link
                   to="/loja/$id"

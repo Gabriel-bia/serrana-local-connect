@@ -141,10 +141,13 @@ function Index() {
                 <div className="mt-3">
                   <WhatsAppButton
                     link={sv.whatsapp}
+                    storeId={sv.id}
+                    storeName={sv.name}
                     message={`Olá! Tenho interesse no serviço "${sv.name}".`}
                     label="WhatsApp"
                     className="w-full !py-2 text-sm"
                   />
+
                 </div>
               </div>
             </div>
