@@ -52,7 +52,7 @@ function LojaPage() {
                 )}
               </div>
             </div>
-            <WhatsAppButton link={store.whatsapp} message={`Olá ${store.name}! Encontrei vocês na Serrana Express.`} label="Chamar no WhatsApp" />
+            <WhatsAppButton link={store.whatsapp} storeId={store.id} storeName={store.name} message={`Olá ${store.name}! Encontrei vocês na Serrana Express.`} label="Chamar no WhatsApp" />
           </div>
 
           <div className="mt-10 pb-10">
