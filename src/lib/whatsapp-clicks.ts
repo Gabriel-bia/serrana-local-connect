@@ -8,12 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 export function logWhatsappClick(input: { storeId: string; storeName: string }) {
   if (!input.storeId || !input.storeName) return;
   try {
-    void supabase
-      .from("whatsapp_clicks")
+    void (supabase.from("whatsapp_clicks" as never) as never as {
+      insert: (row: { store_id: string; store_name: string }) => Promise<{ error: { message: string } | null }>;
+    })
       .insert({ store_id: input.storeId, store_name: input.storeName })
       .then(({ error }) => {
         if (error) console.warn("[whatsapp_clicks] insert failed", error.message);
       });
+
   } catch (err) {
     console.warn("[whatsapp_clicks] insert threw", err);
   }

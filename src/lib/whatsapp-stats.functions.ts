@@ -31,11 +31,25 @@ export const getWhatsappStats = createServerFn({ method: "GET" }).handler(
   async (): Promise<WhatsappStatsResult> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data, error } = await supabaseAdmin
-      .from("whatsapp_clicks")
+    const { data, error } = await (supabaseAdmin.from("whatsapp_clicks" as never) as never as {
+      select: (cols: string) => {
+        order: (
+          col: string,
+          opts: { ascending: boolean },
+        ) => {
+          limit: (
+            n: number,
+          ) => Promise<{
+            data: Array<{ store_id: string; store_name: string; clicked_at: string }> | null;
+            error: { message: string } | null;
+          }>;
+        };
+      };
+    })
       .select("store_id, store_name, clicked_at")
       .order("clicked_at", { ascending: false })
       .limit(50000);
+
 
     if (error) throw new Error(error.message);
 
