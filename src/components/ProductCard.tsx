@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
 import type { Product, Store } from "@/data/seed";
 import { formatPrice, buildWhatsappLink } from "@/lib/store";
+import { logWhatsappClick } from "@/lib/whatsapp-clicks";
+
 
 export function ProductCard({ product, store }: { product: Product; store?: Store }) {
   const waLink = product.whatsapp || store?.whatsapp;
