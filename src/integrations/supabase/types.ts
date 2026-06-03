@@ -14,7 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      whatsapp_clicks: {
+        Row: {
+          clicked_at: string
+          created_at: string
+          id: string
+          store_id: string
+          store_name: string
+        }
+        Insert: {
+          clicked_at?: string
+          created_at?: string
+          id?: string
+          store_id: string
+          store_name: string
+        }
+        Update: {
+          clicked_at?: string
+          created_at?: string
+          id?: string
+          store_id?: string
+          store_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
