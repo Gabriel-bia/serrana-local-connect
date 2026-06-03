@@ -36,6 +36,7 @@ export function ProductCard({ product, store }: { product: Product; store?: Stor
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                if (store) logWhatsappClick({ storeId: store.id, storeName: store.name });
                 window.open(
                   buildWhatsappLink(waLink, `Olá! Tenho interesse no produto "${product.name}".`),
                   "_blank",
@@ -47,6 +48,7 @@ export function ProductCard({ product, store }: { product: Product; store?: Stor
               <MessageCircle className="h-4 w-4" />
             </span>
           )}
+
         </div>
       </div>
     </Link>
