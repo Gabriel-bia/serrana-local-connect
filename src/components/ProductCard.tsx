@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
 import type { Product, Store } from "@/data/seed";
 import { formatPrice, buildWhatsappLink } from "@/lib/store";
+import { logWhatsappClick } from "@/lib/whatsapp-clicks";
+
 
 export function ProductCard({ product, store }: { product: Product; store?: Store }) {
   const waLink = product.whatsapp || store?.whatsapp;
@@ -34,6 +36,7 @@ export function ProductCard({ product, store }: { product: Product; store?: Stor
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                if (store) logWhatsappClick({ storeId: store.id, storeName: store.name });
                 window.open(
                   buildWhatsappLink(waLink, `Olá! Tenho interesse no produto "${product.name}".`),
                   "_blank",
@@ -45,6 +48,7 @@ export function ProductCard({ product, store }: { product: Product; store?: Stor
               <MessageCircle className="h-4 w-4" />
             </span>
           )}
+
         </div>
       </div>
     </Link>

@@ -82,7 +82,13 @@ function AdminPage() {
             <h1 className="text-3xl font-bold">Painel Administrativo</h1>
             <p className="text-sm text-muted-foreground">Gerencie o conteúdo da vitrine.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="/admin/whatsapp"
+              className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-whatsapp)] px-3 py-2 text-sm font-semibold text-[var(--color-whatsapp-foreground)] hover:opacity-90"
+            >
+              📊 Relatório WhatsApp
+            </a>
             <button
               onClick={() => {
                 if (confirm("Restaurar dados de exemplo? Isso apaga suas alterações.")) dataApi.reset();
@@ -98,6 +104,7 @@ function AdminPage() {
               <LogOut className="h-4 w-4" /> Sair
             </button>
           </div>
+
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2 border-b border-border">
