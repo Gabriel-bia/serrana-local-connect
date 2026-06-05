@@ -18,7 +18,7 @@ export function AdminAuthGate({
 }) {
   const navigate = useNavigate();
   const matches = useMatches();
-  const currentRouteId = matches.at(-1)?.routeId;
+  const currentRouteId = matches[matches.length - 1]?.routeId;
   const queryClient = useQueryClient();
   const fetchSession = useServerFn(getAdminSession);
   const signIn = useServerFn(loginAdmin);

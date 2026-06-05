@@ -16,7 +16,7 @@ type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners";
 
 function AdminPage() {
   const matches = useMatches();
-  const currentRouteId = matches.at(-1)?.routeId;
+  const currentRouteId = matches[matches.length - 1]?.routeId;
   const isAdminRoot = currentRouteId === "/admin";
   const redirectAfterLogin = currentRouteId === "/admin/whatsapp" ? "/admin/whatsapp" : "/dashboard";
 
