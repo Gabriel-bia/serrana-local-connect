@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -17,6 +18,11 @@ import { Route as LojaIdRouteImport } from './routes/loja.$id'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AdminWhatsappRouteImport } from './routes/admin.whatsapp'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriasRoute = CategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/categorias': typeof CategoriasRoute
+  '/dashboard': typeof DashboardRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/categorias': typeof CategoriasRoute
+  '/dashboard': typeof DashboardRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/categorias': typeof CategoriasRoute
+  '/dashboard': typeof DashboardRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/categorias'
+    | '/dashboard'
     | '/admin/whatsapp'
     | '/categoria/$slug'
     | '/loja/$id'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/categorias'
+    | '/dashboard'
     | '/admin/whatsapp'
     | '/categoria/$slug'
     | '/loja/$id'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/categorias'
+    | '/dashboard'
     | '/admin/whatsapp'
     | '/categoria/$slug'
     | '/loja/$id'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   CategoriasRoute: typeof CategoriasRoute
+  DashboardRoute: typeof DashboardRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
   LojaIdRoute: typeof LojaIdRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
@@ -122,6 +135,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categorias': {
       id: '/categorias'
       path: '/categorias'
@@ -188,6 +208,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   CategoriasRoute: CategoriasRoute,
+  DashboardRoute: DashboardRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
   LojaIdRoute: LojaIdRoute,
   ProdutoIdRoute: ProdutoIdRoute,

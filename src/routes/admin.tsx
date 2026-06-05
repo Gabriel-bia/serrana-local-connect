@@ -1,13 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
 import { Pencil, Plus, Trash2, RotateCcw, LogOut, ExternalLink, Upload, Lock, Unlock } from "lucide-react";
+import { AdminAuthGate, useAdminLogout } from "@/components/AdminAuthGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { dataApi, useData, formatPrice, isValidWhatsappLink } from "@/lib/store";
 import type { Banner, Category, Product, Service, Store } from "@/data/seed";
-
-const AUTH_KEY = "serrana-admin-auth";
-const ADMIN_PASS = "Gbcgarcia12";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Serrana Express" }] }),
@@ -17,53 +15,38 @@ export const Route = createFileRoute("/admin")({
 type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners";
 
 function AdminPage() {
-  const [authed, setAuthed] = useState(false);
-  const [pass, setPass] = useState("");
-  const [tab, setTab] = useState<Tab>("produtos");
-  const data = useData();
+  const location = useLocation();
+  const redirectAfterLogin = location.pathname === "/admin/whatsapp" ? "/admin/whatsapp" : "/dashboard";
+
+  return (
+    <AdminAuthGate redirectToAfterLogin={redirectAfterLogin}>
+      {location.pathname === "/admin" ? <RedirectToDashboard /> : <Outlet />}
+    </AdminAuthGate>
+  );
+}
+
+function RedirectToDashboard() {
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (typeof window !== "undefined" && sessionStorage.getItem(AUTH_KEY) === "1") {
-      setAuthed(true);
-    }
-  }, []);
+    navigate({ to: "/dashboard", replace: true });
+  }, [navigate]);
 
-  if (!authed) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="container mx-auto px-4 py-16 flex-1 grid place-items-center">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (pass === ADMIN_PASS) {
-                sessionStorage.setItem(AUTH_KEY, "1");
-                setAuthed(true);
-              } else {
-                alert("Senha incorreta.");
-              }
-            }}
-            className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]"
-          >
-            <h1 className="text-2xl font-bold">Área administrativa</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Informe a senha para continuar.</p>
-            <input
-              type="password"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              placeholder="Senha"
-              autoComplete="current-password"
-              className="mt-4 w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <button className="mt-3 w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90">
-              Entrar
-            </button>
-          </form>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="container mx-auto grid flex-1 place-items-center px-4 py-16 text-muted-foreground">
+        Abrindo Dashboard…
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+export function AdminDashboardContent() {
+  const [tab, setTab] = useState<Tab>("produtos");
+  const data = useData();
+  const logout = useAdminLogout("/admin");
 
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: "produtos", label: "Produtos", count: data.products.length },
@@ -98,7 +81,7 @@ function AdminPage() {
               <RotateCcw className="h-4 w-4" /> Restaurar
             </button>
             <button
-              onClick={() => { sessionStorage.removeItem(AUTH_KEY); setAuthed(false); }}
+              onClick={logout}
               className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted"
             >
               <LogOut className="h-4 w-4" /> Sair

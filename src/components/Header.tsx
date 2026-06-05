@@ -38,7 +38,7 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-1 text-sm">
           <Link to="/" className="px-3 py-2 rounded-md hover:bg-muted">Início</Link>
           <Link to="/categorias" className="px-3 py-2 rounded-md hover:bg-muted">Categorias</Link>
-          <Link to="/admin" className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground">Admin</Link>
+          <Link to="/dashboard" className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground">Dashboard</Link>
         </nav>
 
         <button
@@ -72,7 +72,7 @@ export function Header() {
           <div className="flex flex-col">
             <Link to="/" className="py-2" onClick={() => setOpen(false)}>Início</Link>
             <Link to="/categorias" className="py-2" onClick={() => setOpen(false)}>Categorias</Link>
-            <Link to="/admin" className="py-2 text-muted-foreground" onClick={() => setOpen(false)}>Admin</Link>
+            <Link to="/dashboard" className="py-2 text-muted-foreground" onClick={() => setOpen(false)}>Dashboard</Link>
           </div>
         </div>
       )}

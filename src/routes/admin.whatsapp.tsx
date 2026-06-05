@@ -28,12 +28,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { AdminAuthGate } from "@/components/AdminAuthGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getWhatsappStats, type StoreClickStats } from "@/lib/whatsapp-stats.functions";
-
-const AUTH_KEY = "serrana-admin-auth";
-const ADMIN_PASS = "Gbcgarcia12";
 
 export const Route = createFileRoute("/admin/whatsapp")({
   head: () => ({ meta: [{ title: "Relatório de Cliques WhatsApp — Serrana Express" }] }),
@@ -46,53 +44,11 @@ const COLORS = [
 ];
 
 function WhatsappReportPage() {
-  const [authed, setAuthed] = useState(false);
-  const [pass, setPass] = useState("");
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && sessionStorage.getItem(AUTH_KEY) === "1") {
-      setAuthed(true);
-    }
-  }, []);
-
-  if (!authed) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="container mx-auto px-4 py-16 flex-1 grid place-items-center">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (pass === ADMIN_PASS) {
-                sessionStorage.setItem(AUTH_KEY, "1");
-                setAuthed(true);
-              } else {
-                alert("Senha incorreta.");
-              }
-            }}
-            className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]"
-          >
-            <h1 className="text-2xl font-bold">Área administrativa</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Informe a senha para continuar.</p>
-            <input
-              type="password"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              placeholder="Senha"
-              autoComplete="current-password"
-              className="mt-4 w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <button className="mt-3 w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90">
-              Entrar
-            </button>
-          </form>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  return <ReportDashboard />;
+  return (
+    <AdminAuthGate redirectToAfterLogin="/admin/whatsapp">
+      <ReportDashboard />
+    </AdminAuthGate>
+  );
 }
 
 function ReportDashboard() {
