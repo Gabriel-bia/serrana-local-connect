@@ -163,7 +163,7 @@ function Index() {
           <p className="mt-3 text-white/90 max-w-xl mx-auto">
             Cadastre seu negócio na Serrana Express e seja encontrado pelos clientes da sua região.
           </p>
-          <Link to="/admin" className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-primary transition hover:scale-105">
+          <Link to="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-primary transition hover:scale-105">
             Quero cadastrar <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

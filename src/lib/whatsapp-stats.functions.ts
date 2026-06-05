@@ -29,6 +29,8 @@ export type WhatsappStatsResult = {
 
 export const getWhatsappStats = createServerFn({ method: "GET" }).handler(
   async (): Promise<WhatsappStatsResult> => {
+    const { requireAdminSession } = await import("./admin-auth.server");
+    await requireAdminSession();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data, error } = await (supabaseAdmin.from("whatsapp_clicks" as never) as never as {
