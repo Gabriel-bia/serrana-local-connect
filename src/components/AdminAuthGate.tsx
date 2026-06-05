@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useMatches, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, type ReactNode } from "react";
 import { Footer } from "@/components/Footer";
@@ -17,7 +17,8 @@ export function AdminAuthGate({
   redirectToAfterLogin: AdminRoutePath;
 }) {
   const navigate = useNavigate();
-  const location = useLocation();
+  const matches = useMatches();
+  const currentRouteId = matches.at(-1)?.routeId;
   const queryClient = useQueryClient();
   const fetchSession = useServerFn(getAdminSession);
   const signIn = useServerFn(loginAdmin);
@@ -62,7 +63,7 @@ export function AdminAuthGate({
                   loggedAt: new Date().toISOString(),
                 });
                 setPass("");
-                if (location.pathname !== redirectToAfterLogin) {
+                if (currentRouteId !== redirectToAfterLogin) {
                   await navigate({ to: redirectToAfterLogin, replace: true });
                 }
               } catch (err) {

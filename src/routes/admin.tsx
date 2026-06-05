@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useMatches, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
 import { Pencil, Plus, Trash2, RotateCcw, LogOut, ExternalLink, Upload, Lock, Unlock } from "lucide-react";
 import { AdminAuthGate, useAdminLogout } from "@/components/AdminAuthGate";
@@ -15,12 +15,14 @@ export const Route = createFileRoute("/admin")({
 type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners";
 
 function AdminPage() {
-  const location = useLocation();
-  const redirectAfterLogin = location.pathname === "/admin/whatsapp" ? "/admin/whatsapp" : "/dashboard";
+  const matches = useMatches();
+  const currentRouteId = matches.at(-1)?.routeId;
+  const isAdminRoot = currentRouteId === "/admin";
+  const redirectAfterLogin = currentRouteId === "/admin/whatsapp" ? "/admin/whatsapp" : "/dashboard";
 
   return (
     <AdminAuthGate redirectToAfterLogin={redirectAfterLogin}>
-      {location.pathname === "/admin" ? <RedirectToDashboard /> : <Outlet />}
+      {isAdminRoot ? <RedirectToDashboard /> : <Outlet />}
     </AdminAuthGate>
   );
 }
