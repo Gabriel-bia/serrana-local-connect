@@ -53,10 +53,11 @@ function WhatsappReportPage() {
 
 function ReportDashboard() {
   const fetchStats = useServerFn(getWhatsappStats);
-  const { data, isLoading, refetch, isFetching } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["whatsapp-stats"],
     queryFn: () => fetchStats(),
     refetchInterval: 30_000,
+    retry: 1,
   });
 
   return (
@@ -85,7 +86,11 @@ function ReportDashboard() {
           </button>
         </div>
 
-        {isLoading || !data ? (
+        {error ? (
+          <div className="mt-12 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+            Não foi possível carregar o relatório. Atualize a sessão entrando novamente no Dashboard.
+          </div>
+        ) : isLoading || !data ? (
           <div className="mt-12 grid place-items-center text-muted-foreground">Carregando…</div>
         ) : (
           <ReportBody data={data} />
