@@ -16,8 +16,8 @@ export function getAdminSessionConfig() {
     maxAge: 60 * 60 * 24 * 30,
     cookie: {
       httpOnly: true,
-      sameSite: "lax" as const,
-      secure: process.env.NODE_ENV === "production",
+      sameSite: "none" as const,
+      secure: true,
       path: "/",
     },
   };
