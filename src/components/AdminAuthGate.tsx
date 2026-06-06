@@ -57,11 +57,17 @@ export function AdminAuthGate({
               setSubmitting(true);
               try {
                 await signIn({ data: { password: pass } });
-                queryClient.setQueryData(ADMIN_SESSION_QUERY_KEY, {
-                  authenticated: true,
-                  role: "admin",
-                  loggedAt: new Date().toISOString(),
+                const confirmedSession = await queryClient.fetchQuery({
+                  queryKey: ADMIN_SESSION_QUERY_KEY,
+                  queryFn: () => fetchSession(),
+                  staleTime: 0,
                 });
+
+                if (!confirmedSession.authenticated) {
+                  throw new Error("Sessão administrativa não foi confirmada. Tente entrar novamente.");
+                }
+
+                queryClient.setQueryData(ADMIN_SESSION_QUERY_KEY, confirmedSession);
                 setPass("");
                 if (currentRouteId !== redirectToAfterLogin) {
                   await navigate({ to: redirectToAfterLogin, replace: true });
