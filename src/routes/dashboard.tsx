@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 import { AdminAuthGate } from "@/components/AdminAuthGate";
-import { AdminDashboardContent } from "@/routes/admin";
+
+const AdminDashboardContent = lazy(() =>
+  import("@/routes/admin").then((module) => ({ default: module.AdminDashboardContent })),
+);
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Serrana Express" }] }),
@@ -10,7 +14,9 @@ export const Route = createFileRoute("/dashboard")({
 function DashboardPage() {
   return (
     <AdminAuthGate redirectToAfterLogin="/dashboard">
-      <AdminDashboardContent />
+      <Suspense fallback={<div className="min-h-screen grid place-items-center text-muted-foreground">Carregando Dashboard…</div>}>
+        <AdminDashboardContent />
+      </Suspense>
     </AdminAuthGate>
   );
 }
