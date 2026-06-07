@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 import { getAdminSession, loginAdmin, logoutAdmin } from "@/lib/admin-auth.functions";
 
 const ADMIN_SESSION_QUERY_KEY = ["admin-session"] as const;
-type AdminRoutePath = "/admin" | "/dashboard" | "/admin/whatsapp";
+type AdminRoutePath = "/admin" | "/dashboard" | "/admin/whatsapp" | "/admin/relatorios";
 
 export function AdminAuthGate({
   children,
