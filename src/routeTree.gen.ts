@@ -17,6 +17,7 @@ import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as LojaIdRouteImport } from './routes/loja.$id'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AdminWhatsappRouteImport } from './routes/admin.whatsapp'
+import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -58,12 +59,18 @@ const AdminWhatsappRoute = AdminWhatsappRouteImport.update({
   path: '/whatsapp',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/categorias'
     | '/dashboard'
+    | '/admin/relatorios'
     | '/admin/whatsapp'
     | '/categoria/$slug'
     | '/loja/$id'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/categorias'
     | '/dashboard'
+    | '/admin/relatorios'
     | '/admin/whatsapp'
     | '/categoria/$slug'
     | '/loja/$id'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/categorias'
     | '/dashboard'
+    | '/admin/relatorios'
     | '/admin/whatsapp'
     | '/categoria/$slug'
     | '/loja/$id'
@@ -191,14 +203,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWhatsappRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/relatorios': {
+      id: '/admin/relatorios'
+      path: '/relatorios'
+      fullPath: '/admin/relatorios'
+      preLoaderRoute: typeof AdminRelatoriosRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminRelatoriosRoute: typeof AdminRelatoriosRoute
   AdminWhatsappRoute: typeof AdminWhatsappRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminRelatoriosRoute: AdminRelatoriosRoute,
   AdminWhatsappRoute: AdminWhatsappRoute,
 }
 
