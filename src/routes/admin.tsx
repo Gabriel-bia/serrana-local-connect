@@ -74,6 +74,12 @@ export function AdminDashboardContent() {
             >
               📊 Relatório WhatsApp
             </a>
+            <a
+              href="/admin/relatorios"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
+              📄 Relatórios por Loja
+            </a>
             <button
               onClick={() => {
                 if (confirm("Restaurar dados de exemplo? Isso apaga suas alterações.")) dataApi.reset();
