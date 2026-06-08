@@ -69,12 +69,6 @@ export function AdminDashboardContent() {
           </div>
           <div className="flex flex-wrap gap-2">
             <a
-              href="/admin/whatsapp"
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-whatsapp)] px-3 py-2 text-sm font-semibold text-[var(--color-whatsapp-foreground)] hover:opacity-90"
-            >
-              📊 Relatório WhatsApp
-            </a>
-            <a
               href="/admin/relatorios"
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
             >
