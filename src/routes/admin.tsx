@@ -668,3 +668,394 @@ function BannersAdmin() {
     </div>
   );
 }
+
+/* ---------------- Providers (Prestadores) ---------------- */
+
+function ProvidersAdmin() {
+  const { providers, serviceCategories } = useData();
+  const [editing, setEditing] = useState<Provider | null>(null);
+  const [managing, setManaging] = useState<Provider | null>(null);
+  const blank: Provider = {
+    id: "",
+    name: "",
+    photo: "",
+    cover: "",
+    description: "",
+    whatsapp: "",
+    phone: "",
+    city: "",
+    serviceArea: "",
+    instagram: "",
+    facebook: "",
+    schedule: "",
+    categoryIds: [],
+    featured: false,
+    blocked: false,
+  };
+
+  if (managing) {
+    return <ProviderManage provider={managing} onBack={() => setManaging(null)} />;
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+            <tr>
+              <th className="p-3">Prestador</th>
+              <th className="p-3 hidden sm:table-cell">Categorias</th>
+              <th className="p-3">Status</th>
+              <th className="p-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {providers.map((p) => (
+              <tr key={p.id} className="border-t border-border">
+                <td className="p-3">
+                  <div className="flex items-center gap-2">
+                    <img src={p.photo} className="h-10 w-10 rounded-full object-cover" alt="" />
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{p.name}</div>
+                      <div className="text-xs text-muted-foreground">{p.city}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="p-3 hidden sm:table-cell text-muted-foreground text-xs">
+                  {p.categoryIds
+                    .map((id) => serviceCategories.find((c) => c.id === id)?.name)
+                    .filter(Boolean)
+                    .join(", ")}
+                </td>
+                <td className="p-3">
+                  <div className="flex flex-wrap gap-1">
+                    {p.featured && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Destaque</span>}
+                    {p.blocked
+                      ? <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive"><Lock className="h-3 w-3" />Bloqueado</span>
+                      : <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600"><Unlock className="h-3 w-3" />Ativo</span>}
+                  </div>
+                </td>
+                <td className="p-3 text-right whitespace-nowrap">
+                  <button
+                    onClick={() => setManaging(p)}
+                    className="mr-2 inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium hover:bg-muted"
+                    title="Gerenciar serviços e trabalhos"
+                  >
+                    Serviços/Trabalhos
+                  </button>
+                  <button
+                    onClick={() => dataApi.upsert("providers", { ...p, blocked: !p.blocked })}
+                    className="mr-2 inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium hover:bg-muted"
+                  >
+                    {p.blocked ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                  </button>
+                  <button onClick={() => setEditing(p)} className="mr-2 inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-primary hover:bg-muted">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!confirm("Excluir prestador? Os serviços e trabalhos vinculados também serão removidos.")) return;
+                      const all = dataApi.get();
+                      all.providerServices.filter((s) => s.providerId === p.id).forEach((s) => dataApi.remove("providerServices", s.id));
+                      all.providerWorks.filter((w) => w.providerId === p.id).forEach((w) => dataApi.remove("providerWorks", w.id));
+                      dataApi.remove("providers", p.id);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-destructive hover:bg-muted"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="p-3 border-t border-border">
+          <button onClick={() => setEditing(blank)} className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90">
+            <Plus className="h-4 w-4" /> Novo prestador
+          </button>
+        </div>
+      </div>
+
+      {editing && (
+        <ProviderForm
+          key={editing.id || "new"}
+          initial={editing}
+          onCancel={() => setEditing(null)}
+          onSave={(p) => {
+            dataApi.upsert("providers", { ...p, id: p.id || newId() });
+            setEditing(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ProviderForm({ initial, onSave, onCancel }: { initial: Provider; onSave: (p: Provider) => void; onCancel: () => void }) {
+  const { serviceCategories } = useData();
+  const [p, setP] = useState<Provider>(initial);
+
+  function toggleCat(id: string) {
+    setP((prev) => ({
+      ...prev,
+      categoryIds: prev.categoryIds.includes(id)
+        ? prev.categoryIds.filter((x) => x !== id)
+        : [...prev.categoryIds, id],
+    }));
+  }
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!isValidWhatsappLink(p.whatsapp.trim())) {
+          alert("Informe um Link do WhatsApp válido.");
+          return;
+        }
+        if (p.categoryIds.length === 0) {
+          alert("Selecione ao menos uma categoria.");
+          return;
+        }
+        onSave({ ...p, whatsapp: p.whatsapp.trim() });
+      }}
+      className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto"
+    >
+      <h3 className="font-semibold">{p.id ? "Editar prestador" : "Novo prestador"}</h3>
+      <Field label="Nome do profissional ou empresa">
+        <input className={inputClass} value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} required />
+      </Field>
+      <ImageUploadField label="Foto de perfil" value={p.photo} onChange={(v) => setP({ ...p, photo: v })} required />
+      <ImageUploadField label="Imagem de capa" value={p.cover} onChange={(v) => setP({ ...p, cover: v })} required />
+      <Field label="Descrição profissional">
+        <textarea className={inputClass} rows={3} value={p.description} onChange={(e) => setP({ ...p, description: e.target.value })} required />
+      </Field>
+      <WhatsAppLinkField value={p.whatsapp} onChange={(v) => setP({ ...p, whatsapp: v })} />
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Telefone"><input className={inputClass} value={p.phone ?? ""} onChange={(e) => setP({ ...p, phone: e.target.value })} placeholder="+5535999990000" /></Field>
+        <Field label="Cidade"><input className={inputClass} value={p.city ?? ""} onChange={(e) => setP({ ...p, city: e.target.value })} /></Field>
+      </div>
+      <Field label="Região de atendimento">
+        <input className={inputClass} value={p.serviceArea ?? ""} onChange={(e) => setP({ ...p, serviceArea: e.target.value })} placeholder="Ex.: Serrana e região" />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Instagram (sem @)"><input className={inputClass} value={p.instagram ?? ""} onChange={(e) => setP({ ...p, instagram: e.target.value })} /></Field>
+        <Field label="Facebook"><input className={inputClass} value={p.facebook ?? ""} onChange={(e) => setP({ ...p, facebook: e.target.value })} /></Field>
+      </div>
+      <Field label="Horário de atendimento">
+        <input className={inputClass} value={p.schedule ?? ""} onChange={(e) => setP({ ...p, schedule: e.target.value })} placeholder="Ex.: Seg a Sex, 8h-18h" />
+      </Field>
+
+      <div>
+        <span className="text-xs font-medium text-muted-foreground">Categorias de serviço</span>
+        <div className="mt-1 flex flex-wrap gap-1.5 max-h-40 overflow-y-auto rounded-lg border border-border bg-background p-2">
+          {serviceCategories.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => toggleCat(c.id)}
+              className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
+                p.categoryIds.includes(c.id)
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-foreground hover:bg-accent"
+              }`}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Destaque"><select className={inputClass} value={p.featured ? "1" : "0"} onChange={(e) => setP({ ...p, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
+        <Field label="Status"><select className={inputClass} value={p.blocked ? "1" : "0"} onChange={(e) => setP({ ...p, blocked: e.target.value === "1" })}><option value="0">Ativo (visível)</option><option value="1">Bloqueado (oculto)</option></select></Field>
+      </div>
+
+      <div className="flex gap-2 pt-2">
+        <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
+        <button type="button" onClick={onCancel} className="rounded-lg border border-border px-3 py-2 font-medium">Cancelar</button>
+      </div>
+    </form>
+  );
+}
+
+function ProviderManage({ provider, onBack }: { provider: Provider; onBack: () => void }) {
+  const { providerServices, providerWorks, serviceCategories } = useData();
+  const myServices = providerServices.filter((s) => s.providerId === provider.id);
+  const myWorks = providerWorks.filter((w) => w.providerId === provider.id);
+
+  const [editingService, setEditingService] = useState<ProviderService | null>(null);
+  const [editingWork, setEditingWork] = useState<ProviderWork | null>(null);
+
+  const blankService: ProviderService = {
+    id: "",
+    providerId: provider.id,
+    name: "",
+    description: "",
+    price: undefined,
+    image: "",
+    categoryId: provider.categoryIds[0] ?? serviceCategories[0]?.id ?? "",
+    duration: "",
+    active: true,
+    featured: false,
+  };
+  const blankWork: ProviderWork = {
+    id: "",
+    providerId: provider.id,
+    title: "",
+    description: "",
+    image: "",
+    date: new Date().toISOString().slice(0, 10),
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-2 text-sm hover:bg-muted">
+          <ChevronLeft className="h-4 w-4" /> Voltar
+        </button>
+        <div className="flex items-center gap-2">
+          <img src={provider.photo} className="h-10 w-10 rounded-full object-cover" alt="" />
+          <div>
+            <div className="font-semibold">{provider.name}</div>
+            <div className="text-xs text-muted-foreground">Gerenciar serviços e trabalhos</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Services */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <div className="rounded-xl border border-border bg-card overflow-x-auto">
+          <div className="flex items-center justify-between p-3 border-b border-border">
+            <h3 className="font-semibold">Serviços oferecidos</h3>
+            <button onClick={() => setEditingService(blankService)} className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground">
+              <Plus className="h-4 w-4" /> Novo serviço
+            </button>
+          </div>
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+              <tr><th className="p-3">Serviço</th><th className="p-3">Valor</th><th className="p-3">Status</th><th></th></tr>
+            </thead>
+            <tbody>
+              {myServices.length === 0 && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground text-sm">Nenhum serviço cadastrado.</td></tr>}
+              {myServices.map((s) => (
+                <tr key={s.id} className="border-t border-border">
+                  <td className="p-3">
+                    <div className="flex items-center gap-2">
+                      <img src={s.image} className="h-10 w-10 rounded object-cover" alt="" />
+                      <div>
+                        <div className="font-medium">{s.name}</div>
+                        <div className="text-xs text-muted-foreground">{serviceCategories.find((c) => c.id === s.categoryId)?.name}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-3 font-semibold">{s.price != null && s.price > 0 ? formatPrice(s.price) : "—"}</td>
+                  <td className="p-3 text-xs">
+                    {s.active ? <span className="text-emerald-600">Ativo</span> : <span className="text-muted-foreground">Inativo</span>}
+                    {s.featured && <span className="ml-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-primary">Destaque</span>}
+                  </td>
+                  <td className="p-3 text-right whitespace-nowrap">
+                    <button onClick={() => setEditingService(s)} className="mr-2 text-primary"><Pencil className="h-4 w-4" /></button>
+                    <button onClick={() => confirm("Excluir serviço?") && dataApi.remove("providerServices", s.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {editingService && (
+          <form
+            key={editingService.id || "new-s"}
+            onSubmit={(e) => {
+              e.preventDefault();
+              dataApi.upsert("providerServices", { ...editingService, id: editingService.id || newId() });
+              setEditingService(null);
+            }}
+            className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit"
+          >
+            <h3 className="font-semibold">{editingService.id ? "Editar serviço" : "Novo serviço"}</h3>
+            <Field label="Nome"><input className={inputClass} value={editingService.name} onChange={(e) => setEditingService({ ...editingService, name: e.target.value })} required /></Field>
+            <Field label="Descrição"><textarea className={inputClass} rows={3} value={editingService.description} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} /></Field>
+            <ImageUploadField label="Imagem ilustrativa" value={editingService.image} onChange={(v) => setEditingService({ ...editingService, image: v })} required />
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Valor (R$) — opcional">
+                <input type="number" step="0.01" className={inputClass} value={editingService.price ?? ""} onChange={(e) => setEditingService({ ...editingService, price: e.target.value === "" ? undefined : Number(e.target.value) })} />
+              </Field>
+              <Field label="Tempo estimado"><input className={inputClass} value={editingService.duration ?? ""} onChange={(e) => setEditingService({ ...editingService, duration: e.target.value })} placeholder="Ex.: 40 min" /></Field>
+            </div>
+            <Field label="Categoria"><select className={inputClass} value={editingService.categoryId} onChange={(e) => setEditingService({ ...editingService, categoryId: e.target.value })}>{serviceCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Status"><select className={inputClass} value={editingService.active ? "1" : "0"} onChange={(e) => setEditingService({ ...editingService, active: e.target.value === "1" })}><option value="1">Ativo</option><option value="0">Inativo</option></select></Field>
+              <Field label="Destaque"><select className={inputClass} value={editingService.featured ? "1" : "0"} onChange={(e) => setEditingService({ ...editingService, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
+              <button type="button" onClick={() => setEditingService(null)} className="rounded-lg border border-border px-3 py-2 font-medium">Cancelar</button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* Works */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <div className="rounded-xl border border-border bg-card overflow-x-auto">
+          <div className="flex items-center justify-between p-3 border-b border-border">
+            <h3 className="font-semibold">Trabalhos realizados</h3>
+            <button onClick={() => setEditingWork(blankWork)} className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground">
+              <Plus className="h-4 w-4" /> Novo trabalho
+            </button>
+          </div>
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+              <tr><th className="p-3">Trabalho</th><th className="p-3">Data</th><th></th></tr>
+            </thead>
+            <tbody>
+              {myWorks.length === 0 && <tr><td colSpan={3} className="p-6 text-center text-muted-foreground text-sm">Nenhum trabalho publicado.</td></tr>}
+              {myWorks.map((w) => (
+                <tr key={w.id} className="border-t border-border">
+                  <td className="p-3">
+                    <div className="flex items-center gap-2">
+                      <img src={w.image} className="h-10 w-10 rounded object-cover" alt="" />
+                      <div>
+                        <div className="font-medium">{w.title}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-1">{w.description}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-3 text-muted-foreground text-xs">{w.date ? new Date(w.date + "T00:00:00").toLocaleDateString("pt-BR") : "—"}</td>
+                  <td className="p-3 text-right whitespace-nowrap">
+                    <button onClick={() => setEditingWork(w)} className="mr-2 text-primary"><Pencil className="h-4 w-4" /></button>
+                    <button onClick={() => confirm("Excluir trabalho?") && dataApi.remove("providerWorks", w.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {editingWork && (
+          <form
+            key={editingWork.id || "new-w"}
+            onSubmit={(e) => {
+              e.preventDefault();
+              dataApi.upsert("providerWorks", { ...editingWork, id: editingWork.id || newId() });
+              setEditingWork(null);
+            }}
+            className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit"
+          >
+            <h3 className="font-semibold">{editingWork.id ? "Editar trabalho" : "Novo trabalho"}</h3>
+            <Field label="Título"><input className={inputClass} value={editingWork.title} onChange={(e) => setEditingWork({ ...editingWork, title: e.target.value })} required /></Field>
+            <Field label="Descrição"><textarea className={inputClass} rows={3} value={editingWork.description} onChange={(e) => setEditingWork({ ...editingWork, description: e.target.value })} /></Field>
+            <ImageUploadField label="Foto do trabalho" value={editingWork.image} onChange={(v) => setEditingWork({ ...editingWork, image: v })} required />
+            <Field label="Data da publicação"><input type="date" className={inputClass} value={editingWork.date} onChange={(e) => setEditingWork({ ...editingWork, date: e.target.value })} required /></Field>
+            <div className="flex gap-2 pt-2">
+              <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
+              <button type="button" onClick={() => setEditingWork(null)} className="rounded-lg border border-border px-3 py-2 font-medium">Cancelar</button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
