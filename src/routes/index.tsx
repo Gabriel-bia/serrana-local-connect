@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Search, ShoppingBag, Store as StoreIcon, Wrench, MapPin, Flame, Star, Briefcase } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Search, ShoppingBag, Store as StoreIcon, Wrench, MapPin, Flame, Star, Briefcase, UserCog } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { StoreCard } from "@/components/StoreCard";
+import { ProviderCard } from "@/components/ProviderCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { useData } from "@/lib/store";
 import heroBanner from "@/assets/hero-banner-serrana-v2.png.asset.json";
