@@ -5,10 +5,18 @@ import {
   seedProducts,
   seedServices,
   seedStores,
+  seedServiceCategories,
+  seedProviders,
+  seedProviderServices,
+  seedProviderWorks,
   type Banner,
   type Category,
   type Product,
   type Service,
+  type ServiceCategory,
+  type Provider,
+  type ProviderService,
+  type ProviderWork,
   type Store,
 } from "@/data/seed";
 
@@ -18,6 +26,10 @@ type DataShape = {
   products: Product[];
   services: Service[];
   banners: Banner[];
+  serviceCategories: ServiceCategory[];
+  providers: Provider[];
+  providerServices: ProviderService[];
+  providerWorks: ProviderWork[];
 };
 
 const KEY = "serrana-express-data-v2";
