@@ -9,16 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PrestadoresRouteImport } from './routes/prestadores'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
+import { Route as PrestadorIdRouteImport } from './routes/prestador.$id'
 import { Route as LojaIdRouteImport } from './routes/loja.$id'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AdminWhatsappRouteImport } from './routes/admin.whatsapp'
 import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
 
+const PrestadoresRoute = PrestadoresRouteImport.update({
+  id: '/prestadores',
+  path: '/prestadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -42,6 +49,11 @@ const IndexRoute = IndexRouteImport.update({
 const ProdutoIdRoute = ProdutoIdRouteImport.update({
   id: '/produto/$id',
   path: '/produto/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrestadorIdRoute = PrestadorIdRouteImport.update({
+  id: '/prestador/$id',
+  path: '/prestador/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LojaIdRoute = LojaIdRouteImport.update({
@@ -70,10 +82,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/prestadores': typeof PrestadoresRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
+  '/prestador/$id': typeof PrestadorIdRoute
   '/produto/$id': typeof ProdutoIdRoute
 }
 export interface FileRoutesByTo {
@@ -81,10 +95,12 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/prestadores': typeof PrestadoresRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
+  '/prestador/$id': typeof PrestadorIdRoute
   '/produto/$id': typeof ProdutoIdRoute
 }
 export interface FileRoutesById {
@@ -93,10 +109,12 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/prestadores': typeof PrestadoresRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/loja/$id': typeof LojaIdRoute
+  '/prestador/$id': typeof PrestadorIdRoute
   '/produto/$id': typeof ProdutoIdRoute
 }
 export interface FileRouteTypes {
@@ -106,10 +124,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/categorias'
     | '/dashboard'
+    | '/prestadores'
     | '/admin/relatorios'
     | '/admin/whatsapp'
     | '/categoria/$slug'
     | '/loja/$id'
+    | '/prestador/$id'
     | '/produto/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -117,10 +137,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/categorias'
     | '/dashboard'
+    | '/prestadores'
     | '/admin/relatorios'
     | '/admin/whatsapp'
     | '/categoria/$slug'
     | '/loja/$id'
+    | '/prestador/$id'
     | '/produto/$id'
   id:
     | '__root__'
@@ -128,10 +150,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/categorias'
     | '/dashboard'
+    | '/prestadores'
     | '/admin/relatorios'
     | '/admin/whatsapp'
     | '/categoria/$slug'
     | '/loja/$id'
+    | '/prestador/$id'
     | '/produto/$id'
   fileRoutesById: FileRoutesById
 }
@@ -140,13 +164,22 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CategoriasRoute: typeof CategoriasRoute
   DashboardRoute: typeof DashboardRoute
+  PrestadoresRoute: typeof PrestadoresRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
   LojaIdRoute: typeof LojaIdRoute
+  PrestadorIdRoute: typeof PrestadorIdRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/prestadores': {
+      id: '/prestadores'
+      path: '/prestadores'
+      fullPath: '/prestadores'
+      preLoaderRoute: typeof PrestadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -180,6 +213,13 @@ declare module '@tanstack/react-router' {
       path: '/produto/$id'
       fullPath: '/produto/$id'
       preLoaderRoute: typeof ProdutoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prestador/$id': {
+      id: '/prestador/$id'
+      path: '/prestador/$id'
+      fullPath: '/prestador/$id'
+      preLoaderRoute: typeof PrestadorIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/loja/$id': {
@@ -230,20 +270,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CategoriasRoute: CategoriasRoute,
   DashboardRoute: DashboardRoute,
+  PrestadoresRoute: PrestadoresRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
   LojaIdRoute: LojaIdRoute,
+  PrestadorIdRoute: PrestadorIdRoute,
   ProdutoIdRoute: ProdutoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

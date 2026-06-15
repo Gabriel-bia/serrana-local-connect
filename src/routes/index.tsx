@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Search, ShoppingBag, Store as StoreIcon, Wrench, MapPin, Flame, Star, Briefcase } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Search, ShoppingBag, Store as StoreIcon, Wrench, MapPin, Flame, Star, Briefcase, UserCog } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { StoreCard } from "@/components/StoreCard";
+import { ProviderCard } from "@/components/ProviderCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { useData } from "@/lib/store";
 import heroBanner from "@/assets/hero-banner-serrana-v2.png.asset.json";
@@ -25,22 +26,33 @@ export const Route = createFileRoute("/")({
 const shortcuts = [
   { icon: ShoppingBag, label: "Produtos", href: "/categorias" },
   { icon: StoreIcon, label: "Lojas", href: "/categorias" },
+  { icon: UserCog, label: "Prestadores", href: "/prestadores" },
   { icon: Wrench, label: "Serviços", href: "/categoria/servicos" },
   { icon: MapPin, label: "Perto de Você", href: "/categorias" },
 ];
 
 function Index() {
-  const { categories, stores: allStores, products: allProducts, services: allServices } = useData();
+  const {
+    categories,
+    stores: allStores,
+    products: allProducts,
+    services: allServices,
+    providers: allProviders,
+    serviceCategories,
+  } = useData();
   const [q, setQ] = useState("");
   const visibleStoreIds = new Set(allStores.filter((s) => !s.blocked).map((s) => s.id));
   const stores = allStores.filter((s) => !s.blocked);
   const products = allProducts.filter((p) => visibleStoreIds.has(p.storeId));
   const services = allServices.filter((sv) => visibleStoreIds.has(sv.storeId));
+  const providers = allProviders.filter((p) => !p.blocked);
   const featuredStores = stores.filter((s) => s.featured);
   const featuredProducts = products.filter((p) => p.featured);
   const featuredServices = services.filter((s) => s.featured);
+  const featuredProviders = providers.filter((p) => p.featured).slice(0, 8);
   const storeById = Object.fromEntries(stores.map((s) => [s.id, s]));
   const categoryById = Object.fromEntries(categories.map((c) => [c.id, c]));
+  const serviceCategoryById = Object.fromEntries(serviceCategories.map((c) => [c.id, c]));
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -156,18 +168,24 @@ function Index() {
         </div>
       </section>
 
-      {/* CTA Cadastre sua loja */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="rounded-2xl bg-[var(--gradient-hero)] p-8 md:p-12 text-center text-white shadow-[var(--shadow-glow)]">
-          <h2 className="text-2xl md:text-4xl font-extrabold">Tem uma loja ou serviço?</h2>
-          <p className="mt-3 text-white/90 max-w-xl mx-auto">
-            Cadastre seu negócio na Serrana Express e seja encontrado pelos clientes da sua região.
-          </p>
-          <Link to="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-primary transition hover:scale-105">
-            Quero cadastrar <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+      {/* Prestadores em destaque */}
+      <section className="container mx-auto px-4 py-8">
+        <SectionHeader icon={UserCog} title="Prestadores em destaque" link="/prestadores" linkLabel="Ver todos" />
+        {featuredProviders.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum prestador em destaque ainda.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {featuredProviders.map((pr) => (
+              <ProviderCard
+                key={pr.id}
+                provider={pr}
+                categoryName={pr.categoryIds[0] ? serviceCategoryById[pr.categoryIds[0]]?.name : undefined}
+              />
+            ))}
+          </div>
+        )}
       </section>
+
 
       <Footer />
     </div>
