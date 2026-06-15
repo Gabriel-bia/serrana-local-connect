@@ -1,18 +1,18 @@
 import { createFileRoute, Outlet, useMatches, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
-import { Pencil, Plus, Trash2, RotateCcw, LogOut, ExternalLink, Upload, Lock, Unlock } from "lucide-react";
+import { Pencil, Plus, Trash2, RotateCcw, LogOut, ExternalLink, Upload, Lock, Unlock, ChevronLeft } from "lucide-react";
 import { AdminAuthGate, useAdminLogout } from "@/components/AdminAuthGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { dataApi, useData, formatPrice, isValidWhatsappLink } from "@/lib/store";
-import type { Banner, Category, Product, Service, Store } from "@/data/seed";
+import type { Banner, Category, Product, Service, Store, Provider, ProviderService, ProviderWork } from "@/data/seed";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Serrana Express" }] }),
   component: AdminPage,
 });
 
-type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners";
+type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners" | "prestadores";
 
 function AdminPage() {
   const matches = useMatches();
