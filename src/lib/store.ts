@@ -32,33 +32,36 @@ type DataShape = {
   providerWorks: ProviderWork[];
 };
 
-const KEY = "serrana-express-data-v2";
+const KEY = "serrana-express-data-v3";
 
-function loadInitial(): DataShape {
-  if (typeof window === "undefined") {
-    return {
-      categories: seedCategories,
-      stores: seedStores,
-      products: seedProducts,
-      services: seedServices,
-      banners: seedBanners,
-    };
-  }
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw) as DataShape;
-  } catch {}
-  const initial: DataShape = {
+function defaults(): DataShape {
+  return {
     categories: seedCategories,
     stores: seedStores,
     products: seedProducts,
     services: seedServices,
     banners: seedBanners,
+    serviceCategories: seedServiceCategories,
+    providers: seedProviders,
+    providerServices: seedProviderServices,
+    providerWorks: seedProviderWorks,
   };
+}
+
+function loadInitial(): DataShape {
+  const base = defaults();
+  if (typeof window === "undefined") return base;
   try {
-    localStorage.setItem(KEY, JSON.stringify(initial));
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<DataShape>;
+      return { ...base, ...parsed };
+    }
   } catch {}
-  return initial;
+  try {
+    localStorage.setItem(KEY, JSON.stringify(base));
+  } catch {}
+  return base;
 }
 
 let state: DataShape = loadInitial();
