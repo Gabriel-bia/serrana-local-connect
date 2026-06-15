@@ -32,17 +32,27 @@ const shortcuts = [
 ];
 
 function Index() {
-  const { categories, stores: allStores, products: allProducts, services: allServices } = useData();
+  const {
+    categories,
+    stores: allStores,
+    products: allProducts,
+    services: allServices,
+    providers: allProviders,
+    serviceCategories,
+  } = useData();
   const [q, setQ] = useState("");
   const visibleStoreIds = new Set(allStores.filter((s) => !s.blocked).map((s) => s.id));
   const stores = allStores.filter((s) => !s.blocked);
   const products = allProducts.filter((p) => visibleStoreIds.has(p.storeId));
   const services = allServices.filter((sv) => visibleStoreIds.has(sv.storeId));
+  const providers = allProviders.filter((p) => !p.blocked);
   const featuredStores = stores.filter((s) => s.featured);
   const featuredProducts = products.filter((p) => p.featured);
   const featuredServices = services.filter((s) => s.featured);
+  const featuredProviders = providers.filter((p) => p.featured).slice(0, 8);
   const storeById = Object.fromEntries(stores.map((s) => [s.id, s]));
   const categoryById = Object.fromEntries(categories.map((c) => [c.id, c]));
+  const serviceCategoryById = Object.fromEntries(serviceCategories.map((c) => [c.id, c]));
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
