@@ -15,19 +15,20 @@ export const Route = createFileRoute("/prestador/$id")({
 });
 
 async function shareProfile(name: string) {
-  const url = typeof window !== "undefined" ? window.location.href : "";
+  if (typeof window === "undefined") return;
+  const url = window.location.href;
+  const nav = window.navigator;
   const data = { title: name, text: `Conheça ${name} na Serrana Express`, url };
   try {
-    if (typeof navigator !== "undefined" && "share" in navigator) {
-      await navigator.share(data);
+    if ("share" in nav && typeof nav.share === "function") {
+      await nav.share(data);
       return;
     }
   } catch {
-    // user cancelled
     return;
   }
   try {
-    await navigator.clipboard.writeText(url);
+    await nav.clipboard.writeText(url);
     alert("Link do perfil copiado!");
   } catch {
     alert(url);
