@@ -112,6 +112,7 @@ export function AdminDashboardContent() {
         <div className="mt-6">
           {tab === "produtos" && <ProductsAdmin />}
           {tab === "lojas" && <StoresAdmin />}
+          {tab === "prestadores" && <ProvidersAdmin />}
           {tab === "categorias" && <CategoriesAdmin />}
           {tab === "servicos" && <ServicesAdmin />}
           {tab === "banners" && <BannersAdmin />}
