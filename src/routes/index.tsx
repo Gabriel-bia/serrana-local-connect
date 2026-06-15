@@ -168,18 +168,24 @@ function Index() {
         </div>
       </section>
 
-      {/* CTA Cadastre sua loja */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="rounded-2xl bg-[var(--gradient-hero)] p-8 md:p-12 text-center text-white shadow-[var(--shadow-glow)]">
-          <h2 className="text-2xl md:text-4xl font-extrabold">Tem uma loja ou serviço?</h2>
-          <p className="mt-3 text-white/90 max-w-xl mx-auto">
-            Cadastre seu negócio na Serrana Express e seja encontrado pelos clientes da sua região.
-          </p>
-          <Link to="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-primary transition hover:scale-105">
-            Quero cadastrar <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+      {/* Prestadores em destaque */}
+      <section className="container mx-auto px-4 py-8">
+        <SectionHeader icon={UserCog} title="Prestadores em destaque" link="/prestadores" linkLabel="Ver todos" />
+        {featuredProviders.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum prestador em destaque ainda.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {featuredProviders.map((pr) => (
+              <ProviderCard
+                key={pr.id}
+                provider={pr}
+                categoryName={pr.categoryIds[0] ? serviceCategoryById[pr.categoryIds[0]]?.name : undefined}
+              />
+            ))}
+          </div>
+        )}
       </section>
+
 
       <Footer />
     </div>
