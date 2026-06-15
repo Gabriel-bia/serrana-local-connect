@@ -90,13 +90,7 @@ export function useData(): DataShape {
 export const dataApi = {
   get: () => state,
   reset: () => {
-    state = {
-      categories: seedCategories,
-      stores: seedStores,
-      products: seedProducts,
-      services: seedServices,
-      banners: seedBanners,
-    };
+    state = defaults();
     persist();
   },
   upsert<K extends keyof DataShape>(
