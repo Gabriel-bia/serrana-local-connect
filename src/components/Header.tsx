@@ -37,7 +37,7 @@ export function Header() {
 
         <nav className="hidden md:flex items-center gap-1 text-sm">
           <Link to="/" className="px-3 py-2 rounded-md hover:bg-muted">Início</Link>
-          <Link to="/categorias" className="px-3 py-2 rounded-md hover:bg-muted">Categorias</Link>
+          <Link to="/categorias" className="px-3 py-2 rounded-md hover:bg-muted">Categoria Produtos</Link>
           <Link to="/prestadores" className="px-3 py-2 rounded-md hover:bg-muted">Prestadores</Link>
           <Link to="/dashboard" className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground">Dashboard</Link>
         </nav>
