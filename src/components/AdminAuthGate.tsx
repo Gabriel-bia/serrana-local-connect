@@ -1,39 +1,65 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMatches, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useState, type ReactNode } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect, useState, type ReactNode } from "react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { getAdminSession, loginAdmin, logoutAdmin } from "@/lib/admin-auth.functions";
+import { supabase } from "@/integrations/supabase/client";
 
-const ADMIN_SESSION_QUERY_KEY = ["admin-session"] as const;
-type AdminRoutePath = "/admin" | "/dashboard" | "/admin/whatsapp" | "/admin/relatorios";
+type GateState = "loading" | "unauth" | "noadmin" | "ok";
 
-export function AdminAuthGate({
-  children,
-  redirectToAfterLogin,
-}: {
-  children: ReactNode;
-  redirectToAfterLogin: AdminRoutePath;
-}) {
+// Prop kept for backward compatibility with existing call sites.
+type Props = { children: ReactNode; redirectToAfterLogin?: string };
+
+export function AdminAuthGate({ children }: Props) {
   const navigate = useNavigate();
-  const matches = useMatches();
-  const currentRouteId = matches[matches.length - 1]?.routeId;
-  const queryClient = useQueryClient();
-  const fetchSession = useServerFn(getAdminSession);
-  const signIn = useServerFn(loginAdmin);
-  const [pass, setPass] = useState("");
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState<GateState>("loading");
+  const [email, setEmail] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ADMIN_SESSION_QUERY_KEY,
-    queryFn: () => fetchSession(),
-    retry: false,
-    staleTime: 60_000,
-  });
+  useEffect(() => {
+    let mounted = true;
 
-  if (isLoading) {
+    async function check() {
+      const { data: userRes, error: userErr } = await supabase.auth.getUser();
+      const user = !userErr ? userRes.user : null;
+      if (!user) {
+        if (mounted) {
+          setEmail(null);
+          setStatus("unauth");
+        }
+        return;
+      }
+      if (mounted) setEmail(user.email ?? null);
+      const { data: role } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (mounted) setStatus(role ? "ok" : "noadmin");
+    }
+
+    check();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        check();
+      }
+    });
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (status === "unauth") {
+      navigate({
+        to: "/auth",
+        search: { redirect: window.location.pathname },
+        replace: true,
+      });
+    }
+  }, [status, navigate]);
+
+  if (status === "loading" || status === "unauth") {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -45,58 +71,27 @@ export function AdminAuthGate({
     );
   }
 
-  if (!data?.authenticated) {
+  if (status === "noadmin") {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="container mx-auto px-4 py-16 flex-1 grid place-items-center">
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setError("");
-              setSubmitting(true);
-              try {
-                await signIn({ data: { password: pass } });
-                const confirmedSession = await queryClient.fetchQuery({
-                  queryKey: ADMIN_SESSION_QUERY_KEY,
-                  queryFn: () => fetchSession(),
-                  staleTime: 0,
-                });
-
-                if (!confirmedSession.authenticated) {
-                  throw new Error("Sessão administrativa não foi confirmada. Tente entrar novamente.");
-                }
-
-                queryClient.setQueryData(ADMIN_SESSION_QUERY_KEY, confirmedSession);
-                setPass("");
-                if (currentRouteId !== redirectToAfterLogin) {
-                  await navigate({ to: redirectToAfterLogin, replace: true });
-                }
-              } catch (err) {
-                setError(err instanceof Error ? err.message : "Senha incorreta.");
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-            className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]"
-          >
-            <h1 className="text-2xl font-bold">Área administrativa</h1>
-            <input
-              type="password"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              placeholder="Senha"
-              autoComplete="current-password"
-              className="mt-4 w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+        <main className="container mx-auto flex-1 grid place-items-center px-4 py-16">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 text-center shadow-[var(--shadow-card)]">
+            <h1 className="text-2xl font-bold">Acesso negado</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              A conta <b>{email}</b> não é administradora. Solicite ao administrador principal
+              que conceda permissão.
+            </p>
             <button
-              disabled={submitting}
-              className="mt-3 w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                navigate({ to: "/auth", replace: true });
+              }}
+              className="mt-4 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
             >
-              {submitting ? "Entrando…" : "Entrar"}
+              Sair
             </button>
-          </form>
+          </div>
         </main>
         <Footer />
       </div>
@@ -106,15 +101,10 @@ export function AdminAuthGate({
   return <>{children}</>;
 }
 
-export function useAdminLogout(redirectTo: AdminRoutePath = "/admin") {
+export function useAdminLogout(redirectTo: string = "/auth") {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const signOut = useServerFn(logoutAdmin);
-
   return async () => {
-    await signOut();
-    queryClient.setQueryData(ADMIN_SESSION_QUERY_KEY, { authenticated: false, role: null, loggedAt: null });
-    queryClient.removeQueries({ queryKey: ADMIN_SESSION_QUERY_KEY });
+    await supabase.auth.signOut();
     await navigate({ to: redirectTo, replace: true });
   };
 }

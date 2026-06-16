@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useMatches, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
-import { Pencil, Plus, Trash2, RotateCcw, LogOut, ExternalLink, Upload, Lock, Unlock, ChevronLeft } from "lucide-react";
+import { Pencil, Plus, Trash2, LogOut, ExternalLink, Upload, Lock, Unlock, ChevronLeft } from "lucide-react";
 import { AdminAuthGate, useAdminLogout } from "@/components/AdminAuthGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -76,12 +76,20 @@ export function AdminDashboardContent() {
               📄 Relatórios por Loja
             </a>
             <button
-              onClick={() => {
-                if (confirm("Restaurar dados de exemplo? Isso apaga suas alterações.")) dataApi.reset();
+              onClick={async () => {
+                if (!confirm("Enviar os dados deste dispositivo para a nuvem? Isso vai mesclar o conteúdo salvo neste celular/computador com o banco de dados online.")) return;
+                try {
+                  const { inserted } = await dataApi.importFromLocalStorage();
+                  const total = Object.values(inserted).reduce((a, b) => a + b, 0);
+                  alert(`Pronto! ${total} registros enviados para a nuvem.`);
+                } catch (err) {
+                  alert("Falha ao importar: " + (err instanceof Error ? err.message : String(err)));
+                }
               }}
               className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted"
+              title="Faz upload do conteúdo salvo localmente neste dispositivo para o banco compartilhado"
             >
-              <RotateCcw className="h-4 w-4" /> Restaurar
+              <Upload className="h-4 w-4" /> Importar dados deste dispositivo
             </button>
             <button
               onClick={logout}

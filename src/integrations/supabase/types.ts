@@ -14,6 +14,378 @@ export type Database = {
   }
   public: {
     Tables: {
+      banners: {
+        Row: {
+          created_at: string
+          id: string
+          image: string
+          link: string | null
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          image?: string
+          link?: string | null
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image?: string
+          link?: string | null
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          description: string
+          external_link: string | null
+          featured: boolean
+          id: string
+          image: string
+          name: string
+          price: number
+          store_id: string | null
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          external_link?: string | null
+          featured?: boolean
+          id: string
+          image?: string
+          name: string
+          price?: number
+          store_id?: string | null
+          updated_at?: string
+          whatsapp?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          external_link?: string | null
+          featured?: boolean
+          id?: string
+          image?: string
+          name?: string
+          price?: number
+          store_id?: string | null
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      provider_services: {
+        Row: {
+          active: boolean
+          category_id: string | null
+          created_at: string
+          description: string
+          duration: string | null
+          featured: boolean
+          id: string
+          image: string
+          name: string
+          price: number | null
+          provider_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          duration?: string | null
+          featured?: boolean
+          id: string
+          image?: string
+          name: string
+          price?: number | null
+          provider_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          duration?: string | null
+          featured?: boolean
+          id?: string
+          image?: string
+          name?: string
+          price?: number | null
+          provider_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      provider_works: {
+        Row: {
+          created_at: string
+          date: string
+          description: string
+          id: string
+          image: string
+          provider_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          description?: string
+          id: string
+          image?: string
+          provider_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          image?: string
+          provider_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      providers: {
+        Row: {
+          blocked: boolean
+          category_ids: string[]
+          city: string | null
+          cover: string
+          created_at: string
+          description: string
+          facebook: string | null
+          featured: boolean
+          id: string
+          instagram: string | null
+          name: string
+          phone: string | null
+          photo: string
+          schedule: string | null
+          service_area: string | null
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          blocked?: boolean
+          category_ids?: string[]
+          city?: string | null
+          cover?: string
+          created_at?: string
+          description?: string
+          facebook?: string | null
+          featured?: boolean
+          id: string
+          instagram?: string | null
+          name: string
+          phone?: string | null
+          photo?: string
+          schedule?: string | null
+          service_area?: string | null
+          updated_at?: string
+          whatsapp?: string
+        }
+        Update: {
+          blocked?: boolean
+          category_ids?: string[]
+          city?: string | null
+          cover?: string
+          created_at?: string
+          description?: string
+          facebook?: string | null
+          featured?: boolean
+          id?: string
+          instagram?: string | null
+          name?: string
+          phone?: string | null
+          photo?: string
+          schedule?: string | null
+          service_area?: string | null
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      service_categories: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string
+          featured: boolean
+          id: string
+          image: string
+          name: string
+          store_id: string | null
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id: string
+          image?: string
+          name: string
+          store_id?: string | null
+          updated_at?: string
+          whatsapp?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id?: string
+          image?: string
+          name?: string
+          store_id?: string | null
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      stores: {
+        Row: {
+          address: string | null
+          banner: string
+          blocked: boolean
+          category_id: string | null
+          created_at: string
+          description: string
+          featured: boolean
+          id: string
+          instagram: string | null
+          logo: string
+          name: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          address?: string | null
+          banner?: string
+          blocked?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id: string
+          instagram?: string | null
+          logo?: string
+          name: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Update: {
+          address?: string | null
+          banner?: string
+          blocked?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id?: string
+          instagram?: string | null
+          logo?: string
+          name?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_clicks: {
         Row: {
           clicked_at: string
@@ -43,10 +415,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -173,6 +551,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const
