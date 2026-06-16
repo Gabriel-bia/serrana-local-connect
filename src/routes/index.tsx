@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { StoreCard } from "@/components/StoreCard";
 import { ProviderCard } from "@/components/ProviderCard";
-import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { ServiceOfferCard } from "@/components/ServiceOfferCard";
 import { useData } from "@/lib/store";
 import heroBanner from "@/assets/hero-banner-serrana-v2.png.asset.json";
 
