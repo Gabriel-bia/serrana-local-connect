@@ -318,9 +318,7 @@ export const dataApi = {
     else next.push(item as never);
     state = { ...state, [key]: next as DataShape[K] };
     notify();
-    const { error } = await supabase
-      .from(cfg.table)
-      .upsert(cfg.toRow(item as never) as never);
+    const { error } = await sbAny.from(cfg.table).upsert(cfg.toRow(item as never));
     if (error) {
       console.error(`[store] upsert ${key} failed`, error);
       toast.error(`Falha ao salvar: ${error.message}`);
@@ -333,7 +331,7 @@ export const dataApi = {
     const arr = state[key] as Array<{ id: string }>;
     state = { ...state, [key]: arr.filter((x) => x.id !== id) as DataShape[K] };
     notify();
-    const { error } = await supabase.from(cfg.table).delete().eq("id", id);
+    const { error } = await sbAny.from(cfg.table).delete().eq("id", id);
     if (error) {
       console.error(`[store] remove ${key} failed`, error);
       toast.error(`Falha ao excluir: ${error.message}`);
@@ -371,7 +369,7 @@ export const dataApi = {
       const chunkSize = 200;
       for (let i = 0; i < rows.length; i += chunkSize) {
         const slice = rows.slice(i, i + chunkSize);
-        const { error } = await supabase.from(cfg.table).upsert(slice as never);
+        const { error } = await sbAny.from(cfg.table).upsert(slice);
         if (error) {
           console.error(`[import] ${cfg.table} failed`, error);
           throw new Error(`${cfg.table}: ${error.message}`);
