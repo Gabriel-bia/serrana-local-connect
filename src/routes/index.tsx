@@ -141,35 +141,20 @@ function Index() {
 
       {/* Serviços em destaque */}
       <section className="container mx-auto px-4 py-8">
-        <SectionHeader icon={Briefcase} title="Serviços em destaque" link="/categoria/servicos" linkLabel="Ver todos" />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {featuredServices.map((sv) => (
-            <div
-              key={sv.id}
-              className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-glow)]"
-            >
-              <div className="aspect-square overflow-hidden bg-muted">
-                <img src={sv.image} alt={sv.name} loading="lazy" className="h-full w-full object-cover" />
-              </div>
-              <div className="p-3">
-                <h3 className="line-clamp-2 text-sm font-semibold leading-tight">{sv.name}</h3>
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{sv.description}</p>
-                <div className="mt-3">
-                  <WhatsAppButton
-                    link={sv.whatsapp || storeById[sv.storeId]?.whatsapp || ""}
-                    storeId={storeById[sv.storeId]?.id ?? sv.storeId}
-                    storeName={storeById[sv.storeId]?.name ?? sv.name}
-                    message={`Olá! Tenho interesse no serviço "${sv.name}".`}
-                    label="WhatsApp"
-                    className="w-full !py-2 text-sm"
-                  />
-
-
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <SectionHeader icon={Briefcase} title="Serviços em destaque" link="/prestadores" linkLabel="Ver todos" />
+        {featuredProviderServices.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum serviço em destaque ainda.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {featuredProviderServices.map((sv) => (
+              <ServiceOfferCard
+                key={sv.id}
+                service={sv}
+                provider={providerById[sv.providerId]}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Prestadores em destaque */}
