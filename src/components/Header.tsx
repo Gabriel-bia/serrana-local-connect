@@ -72,7 +72,7 @@ export function Header() {
           </form>
           <div className="flex flex-col">
             <Link to="/" className="py-2" onClick={() => setOpen(false)}>Início</Link>
-            <Link to="/categorias" className="py-2" onClick={() => setOpen(false)}>Categorias</Link>
+            <Link to="/categorias" className="py-2" onClick={() => setOpen(false)}>Categoria Produtos</Link>
             <Link to="/prestadores" className="py-2" onClick={() => setOpen(false)}>Prestadores</Link>
             <Link to="/dashboard" className="py-2 text-muted-foreground" onClick={() => setOpen(false)}>Dashboard</Link>
           </div>
