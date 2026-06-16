@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useMatches, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
-import { Pencil, Plus, Trash2, RotateCcw, LogOut, ExternalLink, Upload, Lock, Unlock, ChevronLeft } from "lucide-react";
+import { Pencil, Plus, Trash2, LogOut, ExternalLink, Upload, Lock, Unlock, ChevronLeft } from "lucide-react";
 import { AdminAuthGate, useAdminLogout } from "@/components/AdminAuthGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
