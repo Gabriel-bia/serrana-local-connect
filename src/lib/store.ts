@@ -256,10 +256,14 @@ const map = {
 let loaded = false;
 let loadPromise: Promise<void> | null = null;
 
+// Supabase typed client requires literal table names; we resolve dynamically.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sbAny = supabase as any;
+
 async function loadAll(): Promise<void> {
   const keys = Object.keys(map) as (keyof DataShape)[];
   const results = await Promise.all(
-    keys.map((k) => supabase.from(map[k].table).select("*")),
+    keys.map((k) => sbAny.from(map[k].table).select("*")),
   );
   const next = empty();
   keys.forEach((k, i) => {
@@ -277,12 +281,10 @@ function ensureLoaded() {
   loadPromise = loadAll().catch((err) => {
     console.error("[store] initial load failed", err);
   });
-  // realtime
   const channel = supabase.channel("serrana-data-sync");
   (Object.values(map) as { table: string }[]).forEach((cfg) => {
     channel.on(
-      // @ts-expect-error - postgres_changes is valid event
-      "postgres_changes",
+      "postgres_changes" as never,
       { event: "*", schema: "public", table: cfg.table },
       () => {
         loadAll().catch((err) => console.error("[store] realtime reload failed", err));
