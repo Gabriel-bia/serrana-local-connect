@@ -36,22 +36,26 @@ function Index() {
     categories,
     stores: allStores,
     products: allProducts,
-    services: allServices,
     providers: allProviders,
+    providerServices: allProviderServices,
     serviceCategories,
   } = useData();
   const [q, setQ] = useState("");
   const visibleStoreIds = new Set(allStores.filter((s) => !s.blocked).map((s) => s.id));
   const stores = allStores.filter((s) => !s.blocked);
   const products = allProducts.filter((p) => visibleStoreIds.has(p.storeId));
-  const services = allServices.filter((sv) => visibleStoreIds.has(sv.storeId));
   const providers = allProviders.filter((p) => !p.blocked);
+  const visibleProviderIds = new Set(providers.map((p) => p.id));
+  const providerServices = allProviderServices.filter(
+    (s) => visibleProviderIds.has(s.providerId) && s.active,
+  );
   const featuredStores = stores.filter((s) => s.featured);
   const featuredProducts = products.filter((p) => p.featured);
-  const featuredServices = services.filter((s) => s.featured);
+  const featuredProviderServices = providerServices.filter((s) => s.featured).slice(0, 10);
   const featuredProviders = providers.filter((p) => p.featured).slice(0, 8);
   const storeById = Object.fromEntries(stores.map((s) => [s.id, s]));
   const categoryById = Object.fromEntries(categories.map((c) => [c.id, c]));
+  const providerById = Object.fromEntries(providers.map((p) => [p.id, p]));
   const serviceCategoryById = Object.fromEntries(serviceCategories.map((c) => [c.id, c]));
 
   return (
