@@ -223,18 +223,22 @@ function ImageUploadField({
   const inputId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  function handleFile(file: File) {
+  async function handleFile(file: File) {
     if (!file.type.startsWith("image/")) {
       alert("Selecione um arquivo de imagem.");
       return;
     }
-    if (file.size > 4 * 1024 * 1024) {
-      alert("Imagem muito grande (máximo 4MB).");
+    if (file.size > 15 * 1024 * 1024) {
+      alert("Imagem muito grande (máximo 15MB).");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => onChange(String(reader.result));
-    reader.readAsDataURL(file);
+    try {
+      const dataUrl = await compressImage(file, 1600, 0.82);
+      onChange(dataUrl);
+    } catch (err) {
+      console.error("[image] compress failed", err);
+      alert("Não foi possível processar a imagem.");
+    }
   }
 
   return (
