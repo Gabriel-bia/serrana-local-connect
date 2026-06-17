@@ -38,6 +38,7 @@ const empty = (): DataShape => ({
 });
 
 let state: DataShape = empty();
+let ready = false;
 const listeners = new Set<() => void>();
 function notify() {
   listeners.forEach((l) => l());
@@ -46,6 +47,7 @@ function subscribe(l: () => void) {
   listeners.add(l);
   return () => listeners.delete(l);
 }
+
 
 // ============ Row mappers (DB snake_case <-> camelCase types) ============
 
@@ -272,8 +274,18 @@ async function loadAll(): Promise<void> {
     (next[k] as unknown[]) = rows.map((r) => cfg.fromRow(r));
   });
   state = next;
+  ready = true;
   notify();
 }
+
+export function useDataReady(): boolean {
+  return useSyncExternalStore(
+    subscribe,
+    () => ready,
+    () => ready,
+  );
+}
+
 
 function ensureLoaded() {
   if (loaded || typeof window === "undefined") return;
