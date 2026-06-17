@@ -38,6 +38,7 @@ const empty = (): DataShape => ({
 });
 
 let state: DataShape = empty();
+let ready = false;
 const listeners = new Set<() => void>();
 function notify() {
   listeners.forEach((l) => l());
@@ -46,6 +47,7 @@ function subscribe(l: () => void) {
   listeners.add(l);
   return () => listeners.delete(l);
 }
+
 
 // ============ Row mappers (DB snake_case <-> camelCase types) ============
 
