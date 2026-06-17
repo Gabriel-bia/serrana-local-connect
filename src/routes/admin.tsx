@@ -5,14 +5,14 @@ import { AdminAuthGate, useAdminLogout } from "@/components/AdminAuthGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { dataApi, useData, formatPrice, isValidWhatsappLink } from "@/lib/store";
-import type { Banner, Category, Product, Service, Store, Provider, ProviderService, ProviderWork } from "@/data/seed";
+import type { Banner, Category, Product, Service, ServiceCategory, Store, Provider, ProviderService, ProviderWork } from "@/data/seed";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Serrana Express" }] }),
   component: AdminPage,
 });
 
-type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners" | "prestadores";
+type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners" | "prestadores" | "cat-prestadores";
 
 function AdminPage() {
   const matches = useMatches();
@@ -55,6 +55,7 @@ export function AdminDashboardContent() {
     { key: "lojas", label: "Lojas", count: data.stores.length },
     { key: "prestadores", label: "Prestadores", count: data.providers.length },
     { key: "categorias", label: "Categorias", count: data.categories.length },
+    { key: "cat-prestadores", label: "Categorias de Prestadores", count: data.serviceCategories.length },
     { key: "servicos", label: "Serviços", count: data.services.length },
     { key: "banners", label: "Banners", count: data.banners.length },
   ];
@@ -122,6 +123,7 @@ export function AdminDashboardContent() {
           {tab === "lojas" && <StoresAdmin />}
           {tab === "prestadores" && <ProvidersAdmin />}
           {tab === "categorias" && <CategoriesAdmin />}
+          {tab === "cat-prestadores" && <ServiceCategoriesAdmin />}
           {tab === "servicos" && <ServicesAdmin />}
           {tab === "banners" && <BannersAdmin />}
         </div>
@@ -599,7 +601,56 @@ function CategoriesAdmin() {
   );
 }
 
-/* ---------------- Services ---------------- */
+/* ---------------- Service Categories (Prestadores) ---------------- */
+
+function ServiceCategoriesAdmin() {
+  const { serviceCategories } = useData();
+  const [editing, setEditing] = useState<ServiceCategory | null>(null);
+  const blank: ServiceCategory = { id: "", slug: "", name: "", icon: "Wrench" };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="rounded-xl border border-border bg-card overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Nome</th><th className="p-3">Slug</th><th className="p-3">Ícone</th><th></th></tr></thead>
+          <tbody>
+            {serviceCategories.map((c) => (
+              <tr key={c.id} className="border-t border-border">
+                <td className="p-3 font-medium">{c.name}</td>
+                <td className="p-3 text-muted-foreground">{c.slug}</td>
+                <td className="p-3 text-muted-foreground">{c.icon}</td>
+                <td className="p-3 text-right">
+                  <button onClick={() => setEditing(c)} className="mr-2 text-primary"><Pencil className="h-4 w-4" /></button>
+                  <button onClick={() => confirm("Excluir categoria?") && dataApi.remove("serviceCategories", c.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="p-3 border-t border-border">
+          <button onClick={() => setEditing(blank)} className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"><Plus className="h-4 w-4" /> Nova categoria</button>
+        </div>
+      </div>
+      {editing && (
+        <form
+          key={editing.id || "new"}
+          onSubmit={(e) => { e.preventDefault(); dataApi.upsert("serviceCategories", { ...editing, id: editing.id || newId() }); setEditing(null); }}
+          className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit"
+        >
+          <h3 className="font-semibold">{editing.id ? "Editar categoria" : "Nova categoria de prestador"}</h3>
+          <Field label="Nome"><input className={inputClass} value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} required /></Field>
+          <Field label="Slug (URL)"><input className={inputClass} value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })} required /></Field>
+          <Field label="Ícone (lucide-react)"><input className={inputClass} value={editing.icon} onChange={(e) => setEditing({ ...editing, icon: e.target.value })} placeholder="Wrench" /></Field>
+          <div className="flex gap-2 pt-2">
+            <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
+            <button type="button" onClick={() => setEditing(null)} className="rounded-lg border border-border px-3 py-2 font-medium">Cancelar</button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
 
 function ServicesAdmin() {
   const { services, stores } = useData();
