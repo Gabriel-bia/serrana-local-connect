@@ -55,6 +55,7 @@ export function AdminDashboardContent() {
     { key: "lojas", label: "Lojas", count: data.stores.length },
     { key: "prestadores", label: "Prestadores", count: data.providers.length },
     { key: "categorias", label: "Categorias", count: data.categories.length },
+    { key: "cat-prestadores", label: "Categorias de Prestadores", count: data.serviceCategories.length },
     { key: "servicos", label: "Serviços", count: data.services.length },
     { key: "banners", label: "Banners", count: data.banners.length },
   ];
