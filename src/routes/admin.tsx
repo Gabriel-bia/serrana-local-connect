@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners" | "prestadores";
+type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners" | "prestadores" | "cat-prestadores";
 
 function AdminPage() {
   const matches = useMatches();
