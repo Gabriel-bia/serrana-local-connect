@@ -1,5 +1,5 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { Instagram, Facebook, MapPin, Clock, Phone, Share2 } from "lucide-react";
+import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { Instagram, Facebook, MapPin, Clock, Phone, Share2, ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -54,6 +54,12 @@ function PrestadorPage() {
         <div className="relative h-48 md:h-64 overflow-hidden bg-muted">
           <img src={provider.cover} alt="" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
+          <Link
+            to="/prestadores"
+            className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-lg bg-background/80 backdrop-blur-sm px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-background transition"
+          >
+            <ArrowLeft className="h-4 w-4" /> Voltar
+          </Link>
         </div>
         <div className="container mx-auto px-4 -mt-16 relative">
           <div className="flex flex-col md:flex-row gap-6 items-start rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
