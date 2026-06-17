@@ -46,9 +46,18 @@ async function shareProfile(name: string) {
 
 function PrestadorPage() {
   const { id } = Route.useParams();
+  const ready = useDataReady();
   const { providers, providerServices, providerWorks, serviceCategories } = useData();
+  if (!ready) {
+    return (
+      <div className="min-h-screen grid place-items-center text-muted-foreground">
+        Carregando prestador…
+      </div>
+    );
+  }
   const provider = providers.find((p) => p.id === id);
   if (!provider || provider.blocked) throw notFound();
+
 
   const services = providerServices.filter((s) => s.providerId === provider.id && s.active);
   const works = providerWorks
