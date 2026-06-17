@@ -5,14 +5,23 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ServiceOfferCard } from "@/components/ServiceOfferCard";
 import { WorkCard } from "@/components/WorkCard";
-import { useData } from "@/lib/store";
+import { useData, useDataReady } from "@/lib/store";
 
 export const Route = createFileRoute("/prestador/$id")({
   component: PrestadorPage,
   notFoundComponent: () => (
-    <div className="min-h-screen grid place-items-center">Prestador não encontrado</div>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+      <p className="text-lg font-semibold">Prestador não encontrado</p>
+      <Link
+        to="/prestadores"
+        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90"
+      >
+        <ArrowLeft className="h-4 w-4" /> Voltar para prestadores
+      </Link>
+    </div>
   ),
 });
+
 
 async function shareProfile(name: string) {
   if (typeof window === "undefined") return;
