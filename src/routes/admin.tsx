@@ -123,6 +123,7 @@ export function AdminDashboardContent() {
           {tab === "lojas" && <StoresAdmin />}
           {tab === "prestadores" && <ProvidersAdmin />}
           {tab === "categorias" && <CategoriesAdmin />}
+          {tab === "cat-prestadores" && <ServiceCategoriesAdmin />}
           {tab === "servicos" && <ServicesAdmin />}
           {tab === "banners" && <BannersAdmin />}
         </div>
