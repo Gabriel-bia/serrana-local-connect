@@ -206,8 +206,37 @@ function WhatsAppLinkField({
 }
 
 /**
+ * Redimensiona e comprime uma imagem no navegador para evitar payloads grandes
+ * ao salvar (base64 grande estoura o limite do PostgREST).
+ */
+async function compressImage(file: File, maxDim = 1600, quality = 0.82): Promise<string> {
+  const bitmap = await (typeof createImageBitmap === "function"
+    ? createImageBitmap(file)
+    : new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      }));
+  const w = (bitmap as ImageBitmap).width || (bitmap as HTMLImageElement).naturalWidth;
+  const h = (bitmap as ImageBitmap).height || (bitmap as HTMLImageElement).naturalHeight;
+  const scale = Math.min(1, maxDim / Math.max(w, h));
+  const cw = Math.max(1, Math.round(w * scale));
+  const ch = Math.max(1, Math.round(h * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = cw;
+  canvas.height = ch;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas indisponível");
+  ctx.drawImage(bitmap as CanvasImageSource, 0, 0, cw, ch);
+  const hasAlpha = file.type === "image/png" || file.type === "image/webp";
+  const mime = hasAlpha ? "image/webp" : "image/jpeg";
+  return canvas.toDataURL(mime, quality);
+}
+
+/**
  * Campo de upload de imagem com prévia. Aceita URL colada ou arquivo da galeria.
- * Arquivos são lidos como data URL (base64) — útil para previews locais.
+ * Arquivos são redimensionados e convertidos para base64 compacto.
  */
 function ImageUploadField({
   label,
