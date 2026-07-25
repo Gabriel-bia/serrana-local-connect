@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as PrestadoresRouteImport } from './routes/prestadores'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriasRouteImport } from './routes/categorias'
@@ -22,6 +23,11 @@ import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AdminWhatsappRouteImport } from './routes/admin.whatsapp'
 import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
 
+const ProdutosRoute = ProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrestadoresRoute = PrestadoresRouteImport.update({
   id: '/prestadores',
   path: '/prestadores',
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
   '/prestadores': typeof PrestadoresRoute
+  '/produtos': typeof ProdutosRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
   '/prestadores': typeof PrestadoresRoute
+  '/produtos': typeof ProdutosRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
   '/prestadores': typeof PrestadoresRoute
+  '/produtos': typeof ProdutosRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/dashboard'
     | '/prestadores'
+    | '/produtos'
     | '/admin/relatorios'
     | '/admin/whatsapp'
     | '/categoria/$slug'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/dashboard'
     | '/prestadores'
+    | '/produtos'
     | '/admin/relatorios'
     | '/admin/whatsapp'
     | '/categoria/$slug'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/dashboard'
     | '/prestadores'
+    | '/produtos'
     | '/admin/relatorios'
     | '/admin/whatsapp'
     | '/categoria/$slug'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   CategoriasRoute: typeof CategoriasRoute
   DashboardRoute: typeof DashboardRoute
   PrestadoresRoute: typeof PrestadoresRoute
+  ProdutosRoute: typeof ProdutosRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
   LojaIdRoute: typeof LojaIdRoute
   PrestadorIdRoute: typeof PrestadorIdRoute
@@ -186,6 +199,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/produtos': {
+      id: '/produtos'
+      path: '/produtos'
+      fullPath: '/produtos'
+      preLoaderRoute: typeof ProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/prestadores': {
       id: '/prestadores'
       path: '/prestadores'
@@ -292,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriasRoute: CategoriasRoute,
   DashboardRoute: DashboardRoute,
   PrestadoresRoute: PrestadoresRoute,
+  ProdutosRoute: ProdutosRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
   LojaIdRoute: LojaIdRoute,
   PrestadorIdRoute: PrestadorIdRoute,
@@ -300,13 +321,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
