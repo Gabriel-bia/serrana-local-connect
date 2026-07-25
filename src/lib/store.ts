@@ -135,6 +135,7 @@ const map = {
       description: (r.description as string) ?? "",
       categoryId: (r.category_id as string) ?? "",
       storeId: (r.store_id as string) ?? "",
+      storeCategoryId: (r.store_category_id as string) ?? undefined,
       externalLink: (r.external_link as string) ?? undefined,
       whatsapp: (r.whatsapp as string) ?? "",
       featured: Boolean(r.featured),
@@ -149,11 +150,28 @@ const map = {
       description: p.description ?? "",
       category_id: p.categoryId || null,
       store_id: p.storeId || null,
+      store_category_id: p.storeCategoryId || null,
       external_link: p.externalLink ?? null,
       whatsapp: p.whatsapp ?? "",
       featured: !!p.featured,
     }),
   },
+  storeCategories: {
+    table: "store_categories",
+    fromRow: (r: Row): StoreCategory => ({
+      id: r.id as string,
+      storeId: (r.store_id as string) ?? "",
+      name: (r.name as string) ?? "",
+      position: Number(r.position ?? 0),
+    }),
+    toRow: (c: StoreCategory): Row => ({
+      id: c.id,
+      store_id: c.storeId || null,
+      name: c.name,
+      position: c.position ?? 0,
+    }),
+  },
+
   services: {
     table: "services",
     fromRow: (r: Row): Service => ({
