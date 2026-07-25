@@ -11,11 +11,13 @@ import type {
   ProviderService,
   ProviderWork,
   Store,
+  StoreCategory,
 } from "@/data/seed";
 
 type DataShape = {
   categories: Category[];
   stores: Store[];
+  storeCategories: StoreCategory[];
   products: Product[];
   services: Service[];
   banners: Banner[];
@@ -28,6 +30,7 @@ type DataShape = {
 const empty = (): DataShape => ({
   categories: [],
   stores: [],
+  storeCategories: [],
   products: [],
   services: [],
   banners: [],
@@ -36,6 +39,7 @@ const empty = (): DataShape => ({
   providerServices: [],
   providerWorks: [],
 });
+
 
 let state: DataShape = empty();
 let ready = false;
