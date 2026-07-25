@@ -49,8 +49,15 @@ function Index() {
   const providerServices = allProviderServices.filter(
     (s) => visibleProviderIds.has(s.providerId) && s.active,
   );
+  const byNewest = <T extends { createdAt?: string }>(a: T, b: T) =>
+    (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
+  const productsNewest = [...products].sort(byNewest);
   const featuredStores = stores.filter((s) => s.featured);
-  const featuredProducts = products.filter((p) => p.featured);
+  const newestProducts = productsNewest.slice(0, 10);
+  const promoProducts = productsNewest
+    .filter((p) => p.originalPrice != null && p.originalPrice > p.price)
+    .slice(0, 10);
+  const featuredProducts = productsNewest.filter((p) => p.featured).slice(0, 10);
   const featuredProviderServices = providerServices.filter((s) => s.featured).slice(0, 10);
   const featuredProviders = providers.filter((p) => p.featured).slice(0, 8);
   const storeById = Object.fromEntries(stores.map((s) => [s.id, s]));
