@@ -380,8 +380,17 @@ function ProductsAdmin() {
 }
 
 function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: (p: Product) => void; onCancel: () => void }) {
-  const { stores, categories } = useData();
+  const { stores, categories, storeCategories } = useData();
   const [p, setP] = useState<Product>(initial);
+  const storeCats = storeCategories
+    .filter((sc) => sc.storeId === p.storeId)
+    .sort((a, b) => a.position - b.position);
+  // Reset store category if it no longer belongs to selected store
+  useEffect(() => {
+    if (p.storeCategoryId && !storeCats.some((sc) => sc.id === p.storeCategoryId)) {
+      setP((prev) => ({ ...prev, storeCategoryId: undefined }));
+    }
+  }, [p.storeId, storeCats, p.storeCategoryId]);
   return (
     <form
       onSubmit={(e) => {
@@ -405,8 +414,22 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
       <Field label="Descrição"><textarea className={inputClass} rows={3} value={p.description} onChange={(e) => setP({ ...p, description: e.target.value })} /></Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Categoria"><select className={inputClass} value={p.categoryId} onChange={(e) => setP({ ...p, categoryId: e.target.value })}>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
-        <Field label="Loja"><select className={inputClass} value={p.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setP({ ...p, storeId: e.target.value, whatsapp: st?.whatsapp ?? p.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
+        <Field label="Loja"><select className={inputClass} value={p.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setP({ ...p, storeId: e.target.value, storeCategoryId: undefined, whatsapp: st?.whatsapp ?? p.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
       </div>
+      <Field label="Categoria da Loja (opcional)">
+        <select
+          className={inputClass}
+          value={p.storeCategoryId ?? ""}
+          onChange={(e) => setP({ ...p, storeCategoryId: e.target.value || undefined })}
+          disabled={storeCats.length === 0}
+        >
+          <option value="">— Sem categoria da loja —</option>
+          {storeCats.map((sc) => <option key={sc.id} value={sc.id}>{sc.name}</option>)}
+        </select>
+        {storeCats.length === 0 && (
+          <p className="mt-1 text-xs text-muted-foreground">Esta loja ainda não possui categorias. Crie na edição da loja.</p>
+        )}
+      </Field>
       <WhatsAppLinkField value={p.whatsapp} onChange={(v) => setP({ ...p, whatsapp: v })} />
       <Field label="Link externo (opcional)"><input className={inputClass} value={p.externalLink ?? ""} onChange={(e) => setP({ ...p, externalLink: e.target.value })} /></Field>
       <div className="flex gap-2 pt-2">
@@ -416,6 +439,7 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
     </form>
   );
 }
+
 
 /* ---------------- Stores ---------------- */
 
