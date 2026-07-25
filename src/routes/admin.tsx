@@ -5,7 +5,7 @@ import { AdminAuthGate, useAdminLogout } from "@/components/AdminAuthGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { dataApi, useData, formatPrice, isValidWhatsappLink } from "@/lib/store";
-import type { Banner, Category, Product, Service, ServiceCategory, Store, Provider, ProviderService, ProviderWork } from "@/data/seed";
+import type { Banner, Category, Product, Service, ServiceCategory, Store, StoreCategory, Provider, ProviderService, ProviderWork } from "@/data/seed";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Serrana Express" }] }),
