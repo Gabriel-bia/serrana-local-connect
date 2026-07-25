@@ -7,6 +7,13 @@ import { logWhatsappClick } from "@/lib/whatsapp-clicks";
 
 export function ProductCard({ product, store }: { product: Product; store?: Store }) {
   const waLink = product.whatsapp || store?.whatsapp;
+  const hasPromo =
+    product.originalPrice != null &&
+    product.originalPrice > 0 &&
+    product.originalPrice > product.price;
+  const discount = hasPromo
+    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
+    : 0;
   return (
     <Link
       to="/produto/$id"
@@ -20,6 +27,11 @@ export function ProductCard({ product, store }: { product: Product; store?: Stor
           loading="lazy"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
+        {hasPromo && (
+          <span className="absolute top-2 right-2 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-destructive-foreground">
+            -{discount}%
+          </span>
+        )}
         {product.featured && (
           <span className="absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
             Destaque
@@ -28,7 +40,12 @@ export function ProductCard({ product, store }: { product: Product; store?: Stor
       </div>
       <div className="p-3">
         <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-foreground">{product.name}</h3>
-        <p className="mt-2 text-lg font-extrabold text-primary">{formatPrice(product.price)}</p>
+        <div className="mt-2 flex items-baseline gap-2">
+          <p className="text-lg font-extrabold text-primary">{formatPrice(product.price)}</p>
+          {hasPromo && (
+            <p className="text-xs text-muted-foreground line-through">{formatPrice(product.originalPrice!)}</p>
+          )}
+        </div>
         <div className="mt-2 flex items-center justify-between gap-2">
           {store && <p className="truncate text-xs text-muted-foreground">{store.name}</p>}
           {waLink && (

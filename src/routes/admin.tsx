@@ -329,6 +329,7 @@ function ProductsAdmin() {
     name: "",
     image: "",
     price: 0,
+    originalPrice: undefined,
     description: "",
     categoryId: categories[0]?.id ?? "",
     storeId: stores[0]?.id ?? "",
@@ -398,8 +399,9 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
       <ImageUploadField label="Foto do produto" value={p.image} onChange={(v) => setP({ ...p, image: v })} required />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Preço (R$)"><input type="number" step="0.01" className={inputClass} value={p.price} onChange={(e) => setP({ ...p, price: Number(e.target.value) })} required /></Field>
-        <Field label="Destaque"><select className={inputClass} value={p.featured ? "1" : "0"} onChange={(e) => setP({ ...p, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
+        <Field label="Preço original — DE (opcional)"><input type="number" step="0.01" placeholder="0,00" className={inputClass} value={p.originalPrice ?? ""} onChange={(e) => setP({ ...p, originalPrice: e.target.value === "" ? undefined : Number(e.target.value) })} /></Field>
       </div>
+      <Field label="Destaque"><select className={inputClass} value={p.featured ? "1" : "0"} onChange={(e) => setP({ ...p, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
       <Field label="Descrição"><textarea className={inputClass} rows={3} value={p.description} onChange={(e) => setP({ ...p, description: e.target.value })} /></Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Categoria"><select className={inputClass} value={p.categoryId} onChange={(e) => setP({ ...p, categoryId: e.target.value })}>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
