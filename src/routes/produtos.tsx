@@ -89,7 +89,7 @@ function ProdutosPage() {
   }, [allProducts, visibleIds, storeById, search]);
 
   const update = (patch: Partial<typeof search>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: typeof search) => ({ ...prev, ...patch }) });
 
   return (
     <div className="min-h-screen flex flex-col">
