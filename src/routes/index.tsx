@@ -5,8 +5,10 @@ import * as Icons from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CategoryCarousel } from "@/components/CategoryCarousel";
+import { ProviderCarousel } from "@/components/ProviderCarousel";
 import { useData } from "@/lib/store";
 import heroBanner from "@/assets/hero-banner-serrana-v2.png.asset.json";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
