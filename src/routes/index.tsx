@@ -137,39 +137,80 @@ function Index() {
         </div>
       </section>
 
-      {/* Seções por categoria (dinâmico) */}
-      {sections.length === 0 ? (
+      {/* Seções por categoria (dinâmico) — produtos intercalados com prestadores */}
+      {sections.length === 0 && providerSections.length === 0 ? (
         <section className="container mx-auto px-4 py-16 text-center">
           <p className="text-muted-foreground">Nenhum produto cadastrado ainda.</p>
         </section>
       ) : (
-        sections.map(({ category, products }) => {
-          const Icon =
-            (Icons as unknown as Record<string, Icons.LucideIcon>)[category.icon] ?? Icons.Tag;
-          return (
-            <section key={category.id} className="container mx-auto px-4 py-6">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <h2 className="truncate text-lg sm:text-xl md:text-2xl font-bold">
-                    {category.name}
-                  </h2>
+        (() => {
+          const interleaved: Array<
+            | { kind: "product"; data: (typeof sections)[number] }
+            | { kind: "provider"; data: (typeof providerSections)[number] }
+          > = [];
+          const max = Math.max(sections.length, providerSections.length);
+          for (let i = 0; i < max; i++) {
+            if (i < sections.length) interleaved.push({ kind: "product", data: sections[i] });
+            if (i < providerSections.length)
+              interleaved.push({ kind: "provider", data: providerSections[i] });
+          }
+          return interleaved.map((item) => {
+            if (item.kind === "product") {
+              const { category, products } = item.data;
+              const Icon =
+                (Icons as unknown as Record<string, Icons.LucideIcon>)[category.icon] ?? Icons.Tag;
+              return (
+                <section key={`p-${category.id}`} className="container mx-auto px-4 py-6">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <h2 className="truncate text-lg sm:text-xl md:text-2xl font-bold">
+                        {category.name}
+                      </h2>
+                    </div>
+                    <Link
+                      to="/categoria/$slug"
+                      params={{ slug: category.slug }}
+                      className="shrink-0 text-sm font-semibold text-primary hover:underline"
+                    >
+                      Ver todos
+                    </Link>
+                  </div>
+                  <CategoryCarousel products={products} storeById={storeById} />
+                </section>
+              );
+            }
+            const { category, providers: catProviders } = item.data;
+            const Icon =
+              (Icons as unknown as Record<string, Icons.LucideIcon>)[category.icon] ?? Icons.Wrench;
+            return (
+              <section key={`sp-${category.id}`} className="container mx-auto px-4 py-6">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <h2 className="truncate text-lg sm:text-xl md:text-2xl font-bold">
+                      {category.name}
+                    </h2>
+                  </div>
+                  <Link
+                    to="/prestadores"
+                    search={{ q: "", cat: category.id, city: "" }}
+                    className="shrink-0 text-sm font-semibold text-primary hover:underline"
+                  >
+                    Ver todos
+                  </Link>
                 </div>
-                <Link
-                  to="/categoria/$slug"
-                  params={{ slug: category.slug }}
-                  className="shrink-0 text-sm font-semibold text-primary hover:underline"
-                >
-                  Ver todos
-                </Link>
-              </div>
-              <CategoryCarousel products={products} storeById={storeById} />
-            </section>
-          );
-        })
+                <ProviderCarousel providers={catProviders} categoryName={category.name} />
+              </section>
+            );
+          });
+        })()
       )}
+
 
       <Footer />
     </div>
