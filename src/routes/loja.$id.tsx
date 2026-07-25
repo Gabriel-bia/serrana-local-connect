@@ -18,7 +18,9 @@ function LojaPage() {
   const { stores, products } = useData();
   const store = stores.find((s) => s.id === id);
   if (!store || store.blocked) throw notFound();
-  const list = products.filter((p) => p.storeId === store.id);
+  const list = products
+    .filter((p) => p.storeId === store.id)
+    .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
 
   return (
     <div className="min-h-screen flex flex-col">
