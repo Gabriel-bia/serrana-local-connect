@@ -86,7 +86,7 @@ function Index() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              window.location.href = `/categorias?q=${encodeURIComponent(q)}`;
+              window.location.href = `/produtos?q=${encodeURIComponent(q)}`;
             }}
             className="flex w-full items-center gap-2 rounded-full bg-white p-1.5 shadow-[var(--shadow-glow)] ring-1 ring-primary/10 md:max-w-2xl md:mx-auto"
           >
@@ -136,9 +136,35 @@ function Index() {
         </div>
       </section>
 
+      {/* Novidades - últimos postados */}
+      <section className="container mx-auto px-4 py-8">
+        <SectionHeader icon={Sparkles} title="Novidades" link="/produtos?ord=novos" linkLabel="Ver todos" />
+        {newestProducts.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum produto cadastrado ainda.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {newestProducts.map((p) => (
+              <ProductCard key={p.id} product={p} store={storeById[p.storeId]} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Promoções */}
+      {promoProducts.length > 0 && (
+        <section className="container mx-auto px-4 py-8">
+          <SectionHeader icon={Tag} title="Promoções" link="/produtos?promo=1" linkLabel="Ver todas" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {promoProducts.map((p) => (
+              <ProductCard key={p.id} product={p} store={storeById[p.storeId]} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Produtos em destaque */}
       <section className="container mx-auto px-4 py-8">
-        <SectionHeader icon={Flame} title="Produtos em destaque" link="/categorias" linkLabel="Ver todos" />
+        <SectionHeader icon={Flame} title="Produtos em destaque" link="/produtos" linkLabel="Ver todos" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {featuredProducts.map((p) => (
             <ProductCard key={p.id} product={p} store={storeById[p.storeId]} />
