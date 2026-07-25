@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Search, ShoppingBag, Store as StoreIcon, Wrench, MapPin, Flame, Star, Briefcase, UserCog } from "lucide-react";
+import { Search, ShoppingBag, Store as StoreIcon, Wrench, MapPin, Flame, Star, Briefcase, UserCog, Sparkles, Tag } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
 });
 
 const shortcuts = [
-  { icon: ShoppingBag, label: "Produtos", href: "/categorias" },
+  { icon: ShoppingBag, label: "Produtos", href: "/produtos" },
   { icon: StoreIcon, label: "Lojas", href: "/categorias" },
   { icon: UserCog, label: "Prestadores", href: "/prestadores" },
   { icon: Wrench, label: "Serviços", href: "/categoria/servicos" },
