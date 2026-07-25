@@ -24,12 +24,14 @@ export type Product = {
   name: string;
   image: string;
   price: number;
+  originalPrice?: number;
   description: string;
   categoryId: string;
   storeId: string;
   externalLink?: string;
   whatsapp: string;
   featured: boolean;
+  createdAt?: string;
 };
 
 export type Service = {
