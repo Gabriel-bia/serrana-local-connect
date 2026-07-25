@@ -520,14 +520,41 @@ function StoresAdmin() {
 }
 
 function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: Store, linkedProductIds: string[]) => void; onCancel: () => void }) {
-  const { categories, products } = useData();
+  const { categories, products, storeCategories } = useData();
   const [s, setS] = useState<Store>(initial);
   const [linkedIds, setLinkedIds] = useState<string[]>(
     () => products.filter((p) => p.storeId === initial.id).map((p) => p.id),
   );
+  const [newCatName, setNewCatName] = useState("");
+  const storeCats = storeCategories
+    .filter((sc) => sc.storeId === s.id)
+    .sort((a, b) => a.position - b.position);
 
   function toggleLink(id: string) {
     setLinkedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  async function addStoreCategory() {
+    const name = newCatName.trim();
+    if (!name || !s.id) return;
+    await dataApi.upsert("storeCategories", {
+      id: newId(),
+      storeId: s.id,
+      name,
+      position: storeCats.length,
+    });
+    setNewCatName("");
+  }
+
+  async function renameStoreCategory(sc: StoreCategory) {
+    const name = prompt("Novo nome da categoria:", sc.name)?.trim();
+    if (!name || name === sc.name) return;
+    await dataApi.upsert("storeCategories", { ...sc, name });
+  }
+
+  async function removeStoreCategory(sc: StoreCategory) {
+    if (!confirm(`Excluir a categoria "${sc.name}"? Os produtos permanecerão, mas ficarão sem categoria da loja.`)) return;
+    await dataApi.remove("storeCategories", sc.id);
   }
 
   return (
@@ -554,6 +581,32 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
       </div>
 
       <div>
+        <span className="text-xs font-medium text-muted-foreground">Categorias da loja</span>
+        {!s.id ? (
+          <p className="mt-1 text-xs text-muted-foreground">Salve a loja primeiro para criar categorias próprias.</p>
+        ) : (
+          <>
+            <div className="mt-1 space-y-1 rounded-lg border border-border bg-background p-2">
+              {storeCats.length === 0 && (
+                <p className="p-1 text-xs text-muted-foreground">Nenhuma categoria criada.</p>
+              )}
+              {storeCats.map((sc) => (
+                <div key={sc.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-muted">
+                  <span className="flex-1 truncate">{sc.name}</span>
+                  <button type="button" onClick={() => renameStoreCategory(sc)} className="rounded p-1 hover:bg-background" aria-label="Editar"><Pencil className="h-3.5 w-3.5" /></button>
+                  <button type="button" onClick={() => removeStoreCategory(sc)} className="rounded p-1 hover:bg-background text-destructive" aria-label="Excluir"><Trash2 className="h-3.5 w-3.5" /></button>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 flex gap-2">
+              <input className={inputClass} placeholder="Nova categoria" value={newCatName} onChange={(e) => setNewCatName(e.target.value)} />
+              <button type="button" onClick={addStoreCategory} className="rounded-lg bg-primary px-3 text-sm font-semibold text-primary-foreground">Adicionar</button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div>
         <span className="text-xs font-medium text-muted-foreground">Produtos vinculados à loja</span>
         <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-background p-2 space-y-1">
           {products.length === 0 && <p className="text-xs text-muted-foreground p-2">Nenhum produto cadastrado ainda.</p>}
@@ -576,6 +629,7 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
     </form>
   );
 }
+
 
 /* ---------------- Categories ---------------- */
 
