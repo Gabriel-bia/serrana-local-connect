@@ -3,6 +3,7 @@ import { Instagram, MapPin } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
+import { CategoryCarousel } from "@/components/CategoryCarousel";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { useData } from "@/lib/store";
 
@@ -15,12 +16,25 @@ export const Route = createFileRoute("/loja/$id")({
 
 function LojaPage() {
   const { id } = Route.useParams();
-  const { stores, products } = useData();
+  const { stores, products, storeCategories } = useData();
   const store = stores.find((s) => s.id === id);
   if (!store || store.blocked) throw notFound();
+
   const list = products
     .filter((p) => p.storeId === store.id)
     .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
+
+  const cats = storeCategories
+    .filter((c) => c.storeId === store.id)
+    .sort((a, b) => a.position - b.position);
+
+  const storeById = { [store.id]: store };
+  const sections = cats
+    .map((c) => ({ cat: c, items: list.filter((p) => p.storeCategoryId === c.id) }))
+    .filter((s) => s.items.length > 0);
+  const uncategorized = list.filter(
+    (p) => !p.storeCategoryId || !cats.some((c) => c.id === p.storeCategoryId),
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -57,16 +71,39 @@ function LojaPage() {
             <WhatsAppButton link={store.whatsapp} storeId={store.id} storeName={store.name} message={`Olá ${store.name}! Encontrei vocês na Serrana Express.`} label="Chamar no WhatsApp" />
           </div>
 
-          <div className="mt-10 pb-10">
-            <h2 className="text-2xl font-bold mb-4">Produtos da loja</h2>
-            {list.length === 0 ? (
+          <div className="mt-10 pb-10 space-y-10">
+            {list.length === 0 && (
               <div className="rounded-xl border border-dashed p-12 text-center text-muted-foreground">
                 Esta loja ainda não tem produtos cadastrados.
               </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                {list.map((p) => <ProductCard key={p.id} product={p} store={store} />)}
-              </div>
+            )}
+
+            {sections.map(({ cat, items }) => (
+              <section key={cat.id}>
+                <div className="mb-3 flex items-end justify-between">
+                  <h2 className="text-xl md:text-2xl font-bold">{cat.name}</h2>
+                  <span className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? "item" : "itens"}</span>
+                </div>
+                <CategoryCarousel products={items} storeById={storeById} />
+              </section>
+            ))}
+
+            {uncategorized.length > 0 && (
+              <section>
+                <div className="mb-3 flex items-end justify-between">
+                  <h2 className="text-xl md:text-2xl font-bold">
+                    {sections.length > 0 ? "Outros produtos" : "Produtos da loja"}
+                  </h2>
+                  <span className="text-xs text-muted-foreground">{uncategorized.length} {uncategorized.length === 1 ? "item" : "itens"}</span>
+                </div>
+                {sections.length > 0 ? (
+                  <CategoryCarousel products={uncategorized} storeById={storeById} />
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                    {uncategorized.map((p) => <ProductCard key={p.id} product={p} store={store} />)}
+                  </div>
+                )}
+              </section>
             )}
           </div>
         </div>
@@ -75,3 +112,4 @@ function LojaPage() {
     </div>
   );
 }
+

@@ -28,11 +28,20 @@ export type Product = {
   description: string;
   categoryId: string;
   storeId: string;
+  storeCategoryId?: string;
   externalLink?: string;
   whatsapp: string;
   featured: boolean;
   createdAt?: string;
 };
+
+export type StoreCategory = {
+  id: string;
+  storeId: string;
+  name: string;
+  position: number;
+};
+
 
 export type Service = {
   id: string;

@@ -5,7 +5,7 @@ import { AdminAuthGate, useAdminLogout } from "@/components/AdminAuthGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { dataApi, useData, formatPrice, isValidWhatsappLink } from "@/lib/store";
-import type { Banner, Category, Product, Service, ServiceCategory, Store, Provider, ProviderService, ProviderWork } from "@/data/seed";
+import type { Banner, Category, Product, Service, ServiceCategory, Store, StoreCategory, Provider, ProviderService, ProviderWork } from "@/data/seed";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Serrana Express" }] }),
@@ -380,8 +380,17 @@ function ProductsAdmin() {
 }
 
 function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: (p: Product) => void; onCancel: () => void }) {
-  const { stores, categories } = useData();
+  const { stores, categories, storeCategories } = useData();
   const [p, setP] = useState<Product>(initial);
+  const storeCats = storeCategories
+    .filter((sc) => sc.storeId === p.storeId)
+    .sort((a, b) => a.position - b.position);
+  // Reset store category if it no longer belongs to selected store
+  useEffect(() => {
+    if (p.storeCategoryId && !storeCats.some((sc) => sc.id === p.storeCategoryId)) {
+      setP((prev) => ({ ...prev, storeCategoryId: undefined }));
+    }
+  }, [p.storeId, storeCats, p.storeCategoryId]);
   return (
     <form
       onSubmit={(e) => {
@@ -405,8 +414,22 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
       <Field label="Descrição"><textarea className={inputClass} rows={3} value={p.description} onChange={(e) => setP({ ...p, description: e.target.value })} /></Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Categoria"><select className={inputClass} value={p.categoryId} onChange={(e) => setP({ ...p, categoryId: e.target.value })}>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
-        <Field label="Loja"><select className={inputClass} value={p.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setP({ ...p, storeId: e.target.value, whatsapp: st?.whatsapp ?? p.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
+        <Field label="Loja"><select className={inputClass} value={p.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setP({ ...p, storeId: e.target.value, storeCategoryId: undefined, whatsapp: st?.whatsapp ?? p.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
       </div>
+      <Field label="Categoria da Loja (opcional)">
+        <select
+          className={inputClass}
+          value={p.storeCategoryId ?? ""}
+          onChange={(e) => setP({ ...p, storeCategoryId: e.target.value || undefined })}
+          disabled={storeCats.length === 0}
+        >
+          <option value="">— Sem categoria da loja —</option>
+          {storeCats.map((sc) => <option key={sc.id} value={sc.id}>{sc.name}</option>)}
+        </select>
+        {storeCats.length === 0 && (
+          <p className="mt-1 text-xs text-muted-foreground">Esta loja ainda não possui categorias. Crie na edição da loja.</p>
+        )}
+      </Field>
       <WhatsAppLinkField value={p.whatsapp} onChange={(v) => setP({ ...p, whatsapp: v })} />
       <Field label="Link externo (opcional)"><input className={inputClass} value={p.externalLink ?? ""} onChange={(e) => setP({ ...p, externalLink: e.target.value })} /></Field>
       <div className="flex gap-2 pt-2">
@@ -416,6 +439,7 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
     </form>
   );
 }
+
 
 /* ---------------- Stores ---------------- */
 
@@ -496,14 +520,41 @@ function StoresAdmin() {
 }
 
 function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: Store, linkedProductIds: string[]) => void; onCancel: () => void }) {
-  const { categories, products } = useData();
+  const { categories, products, storeCategories } = useData();
   const [s, setS] = useState<Store>(initial);
   const [linkedIds, setLinkedIds] = useState<string[]>(
     () => products.filter((p) => p.storeId === initial.id).map((p) => p.id),
   );
+  const [newCatName, setNewCatName] = useState("");
+  const storeCats = storeCategories
+    .filter((sc) => sc.storeId === s.id)
+    .sort((a, b) => a.position - b.position);
 
   function toggleLink(id: string) {
     setLinkedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  async function addStoreCategory() {
+    const name = newCatName.trim();
+    if (!name || !s.id) return;
+    await dataApi.upsert("storeCategories", {
+      id: newId(),
+      storeId: s.id,
+      name,
+      position: storeCats.length,
+    });
+    setNewCatName("");
+  }
+
+  async function renameStoreCategory(sc: StoreCategory) {
+    const name = prompt("Novo nome da categoria:", sc.name)?.trim();
+    if (!name || name === sc.name) return;
+    await dataApi.upsert("storeCategories", { ...sc, name });
+  }
+
+  async function removeStoreCategory(sc: StoreCategory) {
+    if (!confirm(`Excluir a categoria "${sc.name}"? Os produtos permanecerão, mas ficarão sem categoria da loja.`)) return;
+    await dataApi.remove("storeCategories", sc.id);
   }
 
   return (
@@ -530,6 +581,32 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
       </div>
 
       <div>
+        <span className="text-xs font-medium text-muted-foreground">Categorias da loja</span>
+        {!s.id ? (
+          <p className="mt-1 text-xs text-muted-foreground">Salve a loja primeiro para criar categorias próprias.</p>
+        ) : (
+          <>
+            <div className="mt-1 space-y-1 rounded-lg border border-border bg-background p-2">
+              {storeCats.length === 0 && (
+                <p className="p-1 text-xs text-muted-foreground">Nenhuma categoria criada.</p>
+              )}
+              {storeCats.map((sc) => (
+                <div key={sc.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-muted">
+                  <span className="flex-1 truncate">{sc.name}</span>
+                  <button type="button" onClick={() => renameStoreCategory(sc)} className="rounded p-1 hover:bg-background" aria-label="Editar"><Pencil className="h-3.5 w-3.5" /></button>
+                  <button type="button" onClick={() => removeStoreCategory(sc)} className="rounded p-1 hover:bg-background text-destructive" aria-label="Excluir"><Trash2 className="h-3.5 w-3.5" /></button>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 flex gap-2">
+              <input className={inputClass} placeholder="Nova categoria" value={newCatName} onChange={(e) => setNewCatName(e.target.value)} />
+              <button type="button" onClick={addStoreCategory} className="rounded-lg bg-primary px-3 text-sm font-semibold text-primary-foreground">Adicionar</button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div>
         <span className="text-xs font-medium text-muted-foreground">Produtos vinculados à loja</span>
         <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-background p-2 space-y-1">
           {products.length === 0 && <p className="text-xs text-muted-foreground p-2">Nenhum produto cadastrado ainda.</p>}
@@ -552,6 +629,7 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
     </form>
   );
 }
+
 
 /* ---------------- Categories ---------------- */
 

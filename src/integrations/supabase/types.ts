@@ -83,6 +83,7 @@ export type Database = {
           name: string
           original_price: number | null
           price: number
+          store_category_id: string | null
           store_id: string | null
           updated_at: string
           whatsapp: string
@@ -98,6 +99,7 @@ export type Database = {
           name: string
           original_price?: number | null
           price?: number
+          store_category_id?: string | null
           store_id?: string | null
           updated_at?: string
           whatsapp?: string
@@ -113,11 +115,20 @@ export type Database = {
           name?: string
           original_price?: number | null
           price?: number
+          store_category_id?: string | null
           store_id?: string | null
           updated_at?: string
           whatsapp?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_store_category_id_fkey"
+            columns: ["store_category_id"]
+            isOneToOne: false
+            referencedRelation: "store_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       provider_services: {
         Row: {
@@ -319,6 +330,41 @@ export type Database = {
           whatsapp?: string
         }
         Relationships: []
+      }
+      store_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          name: string
+          position?: number
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_categories_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stores: {
         Row: {
