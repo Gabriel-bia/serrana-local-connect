@@ -387,6 +387,8 @@ export const dataApi = {
       "serviceCategories",
       "banners",
       "stores",
+      "storeCategories",
+
       "providers",
       "products",
       "services",
