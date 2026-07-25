@@ -31,12 +31,19 @@ const shortcuts = [
 ];
 
 function Index() {
-  const { categories, stores: allStores, products: allProducts } = useData();
+  const {
+    categories,
+    stores: allStores,
+    products: allProducts,
+    providers: allProviders,
+    serviceCategories,
+  } = useData();
   const [q, setQ] = useState("");
 
   const stores = allStores.filter((s) => !s.blocked);
   const visibleStoreIds = new Set(stores.map((s) => s.id));
   const products = allProducts.filter((p) => visibleStoreIds.has(p.storeId));
+  const providers = useMemo(() => allProviders.filter((p) => !p.blocked), [allProviders]);
   const storeById = useMemo(
     () => Object.fromEntries(stores.map((s) => [s.id, s])),
     [stores],
@@ -59,6 +66,21 @@ function Index() {
       })
       .filter((s) => s.products.length > 0);
   }, [products, categories]);
+
+  // Agrupar prestadores por categoria de serviço (dinâmico, ignora vazias)
+  const providerSections = useMemo(() => {
+    const byCat = new Map<string, typeof providers>();
+    for (const p of providers) {
+      for (const cid of p.categoryIds ?? []) {
+        if (!byCat.has(cid)) byCat.set(cid, []);
+        byCat.get(cid)!.push(p);
+      }
+    }
+    return serviceCategories
+      .map((cat) => ({ category: cat, providers: (byCat.get(cat.id) ?? []).slice(0, 20) }))
+      .filter((s) => s.providers.length > 0);
+  }, [providers, serviceCategories]);
+
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
