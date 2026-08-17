@@ -287,20 +287,36 @@ let loadPromise: Promise<void> | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sbAny = supabase as any;
 
+/** Carrega uma tabela e atualiza o estado imediatamente (render progressivo). */
+async function loadTable(key: keyof DataShape): Promise<void> {
+  const cfg = map[key];
+  const { data, error } = await sbAny.from(cfg.table).select("*");
+  if (error) {
+    console.error(`[store] load ${cfg.table} failed`, error.message);
+    return;
+  }
+  const rows = (data ?? []) as Row[];
+  state = { ...state, [key]: rows.map((r) => cfg.fromRow(r)) as DataShape[typeof key] };
+  notify();
+}
+
 async function loadAll(): Promise<void> {
-  const keys = Object.keys(map) as (keyof DataShape)[];
-  const results = await Promise.all(
-    keys.map((k) => sbAny.from(map[k].table).select("*")),
-  );
-  const next = empty();
-  keys.forEach((k, i) => {
-    const rows = (results[i].data ?? []) as Row[];
-    const cfg = map[k];
-    (next[k] as unknown[]) = rows.map((r) => cfg.fromRow(r));
-  });
-  state = next;
+  // Tabelas leves e essenciais primeiro: a home renderiza assim que chegam.
+  const priority: (keyof DataShape)[] = [
+    "categories",
+    "serviceCategories",
+    "storeCategories",
+    "banners",
+    "stores",
+    "providers",
+    "products",
+  ];
+  const rest = (Object.keys(map) as (keyof DataShape)[]).filter((k) => !priority.includes(k));
+
+  await Promise.all(priority.map((k) => loadTable(k)));
   ready = true;
   notify();
+  await Promise.all(rest.map((k) => loadTable(k)));
 }
 
 export function useDataReady(): boolean {
@@ -311,6 +327,22 @@ export function useDataReady(): boolean {
   );
 }
 
+// Recarrega apenas as tabelas alteradas, agrupando eventos próximos.
+const pendingTables = new Set<keyof DataShape>();
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleReload(key: keyof DataShape) {
+  pendingTables.add(key);
+  if (flushTimer) return;
+  flushTimer = setTimeout(() => {
+    flushTimer = null;
+    const keys = [...pendingTables];
+    pendingTables.clear();
+    Promise.all(keys.map((k) => loadTable(k))).catch((err) =>
+      console.error("[store] realtime reload failed", err),
+    );
+  }, 500);
+}
 
 function ensureLoaded() {
   if (loaded || typeof window === "undefined") return;
@@ -319,17 +351,16 @@ function ensureLoaded() {
     console.error("[store] initial load failed", err);
   });
   const channel = supabase.channel("serrana-data-sync");
-  (Object.values(map) as { table: string }[]).forEach((cfg) => {
+  (Object.keys(map) as (keyof DataShape)[]).forEach((key) => {
     channel.on(
       "postgres_changes" as never,
-      { event: "*", schema: "public", table: cfg.table },
-      () => {
-        loadAll().catch((err) => console.error("[store] realtime reload failed", err));
-      },
+      { event: "*", schema: "public", table: map[key].table },
+      () => scheduleReload(key),
     );
   });
   channel.subscribe();
 }
+
 
 ensureLoaded();
 

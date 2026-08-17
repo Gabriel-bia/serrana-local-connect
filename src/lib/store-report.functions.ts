@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 export type StoreReportRow = {
@@ -20,43 +21,43 @@ export type StoreReportResult = {
 
 const inputSchema = z.object({
   storeId: z.string().min(1).max(200).optional().nullable(),
-  startDate: z.string().datetime().optional().nullable(),
-  endDate: z.string().datetime().optional().nullable(),
+  startDate: z.string().optional().nullable(),
+  endDate: z.string().optional().nullable(),
+  /** Restringe o relatório a um conjunto de IDs (lojas ou prestadores). */
+  entityIds: z.array(z.string().min(1).max(200)).max(2000).optional().nullable(),
 });
 
 export const getStoreReport = createServerFn({ method: "POST" })
-  .inputValidator((data) => inputSchema.parse(data))
-  .handler(async ({ data }): Promise<StoreReportResult> => {
-    const { requireAdminSession } = await import("./admin-auth.server");
-    await requireAdminSession();
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => inputSchema.parse(data))
+  .handler(async ({ data, context }): Promise<StoreReportResult> => {
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (roleError) throw new Error(roleError.message);
+    if (!isAdmin) throw new Error("Acesso administrativo obrigatório.");
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    let query = (supabaseAdmin.from("whatsapp_clicks" as never) as never as {
-      select: (cols: string) => {
-        order: (col: string, opts: { ascending: boolean }) => {
-          limit: (n: number) => Promise<{
-            data: Array<{ store_id: string; store_name: string; clicked_at: string }> | null;
-            error: { message: string } | null;
-          }>;
-          gte?: (col: string, v: string) => unknown;
-        };
-      };
-    })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let q: any = (supabaseAdmin as any)
+      .from("whatsapp_clicks")
       .select("store_id, store_name, clicked_at");
 
-    let q: any = query;
     if (data.storeId) q = q.eq("store_id", data.storeId);
     if (data.startDate) q = q.gte("clicked_at", data.startDate);
     if (data.endDate) q = q.lte("clicked_at", data.endDate);
 
-    const { data: rows, error } = await q
-      .order("clicked_at", { ascending: false })
-      .limit(50000);
+    const { data: rows, error } = await q.order("clicked_at", { ascending: false }).limit(50000);
 
     if (error) throw new Error(error.message);
 
+    const allowed = data.entityIds && data.entityIds.length > 0 ? new Set(data.entityIds) : null;
+
     const map = new Map<string, StoreReportRow>();
     for (const row of (rows ?? []) as Array<{ store_id: string; store_name: string; clicked_at: string }>) {
+      if (allowed && !allowed.has(row.store_id)) continue;
       const r = map.get(row.store_id);
       const day = row.clicked_at.slice(0, 10);
       if (r) {

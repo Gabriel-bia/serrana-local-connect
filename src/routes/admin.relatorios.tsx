@@ -30,8 +30,12 @@ type HistoryEntry = {
   total: number;
 };
 
+type Kind = "stores" | "providers";
+export type ReportEntity = { id: string; name: string; categoryName: string };
+
 function ReportsPage() {
-  const { stores, categories } = useData();
+  const { stores, categories, providers, serviceCategories } = useData();
+  const [kind, setKind] = useState<Kind>("stores");
   const [storeId, setStoreId] = useState<string>("all");
   const [period, setPeriod] = useState<Period>("30d");
   const [customStart, setCustomStart] = useState<string>("");
@@ -45,21 +49,57 @@ function ReportsPage() {
     } catch {}
   }, []);
 
+  const entities: ReportEntity[] = useMemo(() => {
+    if (kind === "providers") {
+      return providers.map((p) => ({
+        id: p.id,
+        name: p.name,
+        categoryName:
+          (p.categoryIds ?? [])
+            .map((cid) => serviceCategories.find((c) => c.id === cid)?.name)
+            .filter(Boolean)
+            .join(", ") || "—",
+      }));
+    }
+    return stores.map((s) => ({
+      id: s.id,
+      name: s.name,
+      categoryName: categories.find((c) => c.id === s.categoryId)?.name ?? "—",
+    }));
+  }, [kind, stores, categories, providers, serviceCategories]);
+
+  const entityIds = useMemo(() => entities.map((e) => e.id), [entities]);
+  const noun = kind === "providers" ? "prestador" : "loja";
+  const nounPlural = kind === "providers" ? "prestadores" : "lojas";
+
+  useEffect(() => {
+    setStoreId("all");
+  }, [kind]);
+
   const { startDate, endDate, periodLabel } = useMemo(() => computeRange(period, customStart, customEnd), [period, customStart, customEnd]);
 
   const fetchReport = useServerFn(getStoreReport);
   const { data, isLoading, isFetching, refetch, error } = useQuery({
-    queryKey: ["store-report", storeId, startDate, endDate],
-    queryFn: () => fetchReport({ data: { storeId: storeId === "all" ? null : storeId, startDate, endDate } }),
+    queryKey: ["store-report", kind, storeId, startDate, endDate, entityIds.length],
+    queryFn: () =>
+      fetchReport({
+        data: {
+          storeId: storeId === "all" ? null : storeId,
+          startDate,
+          endDate,
+          entityIds: storeId === "all" ? entityIds : null,
+        },
+      }),
+    enabled: entityIds.length > 0 || storeId !== "all",
     retry: 1,
   });
 
-  const selectedStore = storeId === "all" ? null : stores.find((s) => s.id === storeId) ?? null;
-  const storeLabel = selectedStore ? selectedStore.name : "Todas as lojas";
+  const selectedStore = storeId === "all" ? null : entities.find((s) => s.id === storeId) ?? null;
+  const storeLabel = selectedStore ? selectedStore.name : `Todos os ${nounPlural}`;
 
   const onExportPDF = async () => {
     if (!data) return;
-    await exportPDF({ data, stores, categories, selectedStoreId: storeId, periodLabel, storeLabel });
+    await exportPDF({ data, entities, selectedStoreId: storeId, periodLabel, storeLabel, noun });
     const entry: HistoryEntry = {
       id: crypto.randomUUID(),
       generatedAt: new Date().toISOString(),
@@ -81,23 +121,36 @@ function ReportsPage() {
         <a href="/admin" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Voltar ao painel
         </a>
-        <h1 className="mt-1 text-3xl font-bold">Relatórios por Loja</h1>
-        <p className="text-sm text-muted-foreground">Gere relatórios individuais ou gerais e exporte em PDF.</p>
+        <h1 className="mt-1 text-3xl font-bold">Relatórios</h1>
+        <p className="text-sm text-muted-foreground">Gere relatórios de lojas ou prestadores de serviço e exporte em PDF.</p>
 
-        <div className="mt-6 grid gap-4 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] md:grid-cols-[1fr_1fr_auto]">
+        <div className="mt-6 grid gap-4 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] md:grid-cols-[1fr_1fr_1fr_auto]">
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">Loja</span>
+            <span className="text-xs font-medium text-muted-foreground">Tipo</span>
+            <select
+              value={kind}
+              onChange={(e) => setKind(e.target.value as Kind)}
+              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="stores">Lojas</option>
+              <option value="providers">Prestadores de serviço</option>
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-xs font-medium text-muted-foreground">{kind === "providers" ? "Prestador" : "Loja"}</span>
             <select
               value={storeId}
               onChange={(e) => setStoreId(e.target.value)}
               className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="all">Todas as lojas (relatório geral)</option>
-              {stores.map((s) => (
+              <option value="all">Todos os {nounPlural} (relatório geral)</option>
+              {entities.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
                 </option>
               ))}
+
             </select>
           </label>
 
@@ -159,14 +212,16 @@ function ReportsPage() {
         <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
           <h2 className="mb-4 text-lg font-bold">Prévia do relatório</h2>
           {error ? (
-            <p className="text-sm text-destructive">Erro ao carregar. Atualize a sessão.</p>
+            <p className="text-sm text-destructive">
+              Não foi possível gerar o relatório: {(error as Error).message}
+            </p>
           ) : isLoading || !data ? (
             <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : (
             <ReportPreview
               data={data}
-              stores={stores}
-              categories={categories}
+              entities={entities}
+              noun={noun}
               selectedStoreId={storeId}
               storeLabel={storeLabel}
               periodLabel={periodLabel}
@@ -220,30 +275,31 @@ function ReportsPage() {
 
 function ReportPreview({
   data,
-  stores,
-  categories,
+  entities,
+  noun,
   selectedStoreId,
   storeLabel,
   periodLabel,
 }: {
   data: StoreReportResult;
-  stores: ReturnType<typeof useData>["stores"];
-  categories: ReturnType<typeof useData>["categories"];
+  entities: ReportEntity[];
+  noun: string;
   selectedStoreId: string;
   storeLabel: string;
   periodLabel: string;
 }) {
   const avg = data.totals.averagePerStore;
-  const selected = selectedStoreId !== "all" ? stores.find((s) => s.id === selectedStoreId) : null;
+  const selected = selectedStoreId !== "all" ? entities.find((s) => s.id === selectedStoreId) : null;
   const selectedRow = selected ? data.rows.find((r) => r.storeId === selected.id) : null;
   const selectedCount = selectedRow?.total ?? 0;
 
   const observation =
     selectedStoreId === "all"
-      ? `Total de ${data.totals.all} cliques distribuídos entre ${data.totals.storesWithClicks} loja(s). Média por loja: ${avg.toFixed(1)}.`
+      ? `Total de ${data.totals.all} cliques distribuídos entre ${data.totals.storesWithClicks} ${noun}(s). Média por ${noun}: ${avg.toFixed(1)}.`
       : selectedCount >= avg
-      ? "Parabéns! Sua loja está apresentando excelente desempenho e atraindo muitos clientes."
-      : "Há oportunidades para aumentar a visibilidade da sua loja. Considere atualizar suas publicações e ofertas.";
+      ? "Parabéns! O desempenho está acima da média, atraindo muitos clientes."
+      : "Há oportunidades para aumentar a visibilidade. Considere atualizar as publicações e ofertas.";
+
 
   return (
     <div className="space-y-6">
@@ -264,8 +320,8 @@ function ReportPreview({
 
       {selected ? (
         <div className="grid gap-4 md:grid-cols-2">
-          <Info label="Loja" value={selected.name} />
-          <Info label="Categoria" value={categories.find((c) => c.id === selected.categoryId)?.name ?? "—"} />
+          <Info label={noun === "prestador" ? "Prestador" : "Loja"} value={selected.name} />
+          <Info label="Categoria" value={selected.categoryName} />
           <Info label="Cliques no WhatsApp" value={selectedCount.toLocaleString("pt-BR")} highlight />
           <Info label="Visualizações" value="Métrica em implantação" />
           <Info
@@ -303,8 +359,8 @@ function ReportPreview({
             </thead>
             <tbody>
               {data.rows.map((r) => {
-                const st = stores.find((s) => s.id === r.storeId);
-                const cat = st ? categories.find((c) => c.id === st.categoryId)?.name : "—";
+                const st = entities.find((s) => s.id === r.storeId);
+                const cat = st ? st.categoryName : "—";
                 return (
                   <tr key={r.storeId} className="border-t border-border">
                     <td className="p-2 font-medium">{r.storeName}</td>
@@ -364,15 +420,15 @@ function computeRange(period: Period, customStart: string, customEnd: string) {
 
 async function exportPDF({
   data,
-  stores,
-  categories,
+  entities,
+  noun,
   selectedStoreId,
   periodLabel,
   storeLabel,
 }: {
   data: StoreReportResult;
-  stores: ReturnType<typeof useData>["stores"];
-  categories: ReturnType<typeof useData>["categories"];
+  entities: ReportEntity[];
+  noun: string;
   selectedStoreId: string;
   periodLabel: string;
   storeLabel: string;
@@ -398,22 +454,22 @@ async function exportPDF({
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(80, 80, 80);
-  doc.text(`Loja: ${storeLabel}`, 34, 26);
+  doc.text(`${noun === "prestador" ? "Prestador" : "Loja"}: ${storeLabel}`, 34, 26);
   doc.text(`Período: ${periodLabel}`, 34, 31);
   doc.text(`Gerado em: ${new Date(data.generatedAt).toLocaleString("pt-BR")}`, 34, 36);
 
   let y = 46;
-  const selected = selectedStoreId !== "all" ? stores.find((s) => s.id === selectedStoreId) : null;
+  const selected = selectedStoreId !== "all" ? entities.find((s) => s.id === selectedStoreId) : null;
   const avg = data.totals.averagePerStore;
 
   if (selected) {
     const row = data.rows.find((r) => r.storeId === selected.id);
-    const cat = categories.find((c) => c.id === selected.categoryId)?.name ?? "—";
+    const cat = selected.categoryName;
     autoTable(doc, {
       startY: y,
       head: [["Campo", "Valor"]],
       body: [
-        ["Nome da loja", selected.name],
+        [noun === "prestador" ? "Nome do prestador" : "Nome da loja", selected.name],
         ["Categoria", cat],
         ["Quantidade de cliques no WhatsApp", String(row?.total ?? 0)],
         ["Visualizações", "Métrica em implantação"],
@@ -455,8 +511,8 @@ async function exportPDF({
       startY: y,
       head: [["Loja", "Categoria", "Cliques", "Último clique"]],
       body: data.rows.map((r) => {
-        const st = stores.find((s) => s.id === r.storeId);
-        const cat = st ? categories.find((c) => c.id === st.categoryId)?.name ?? "—" : "—";
+        const st = entities.find((s) => s.id === r.storeId);
+        const cat = st ? st.categoryName : "—";
         return [r.storeName, cat, String(r.total), r.lastClickAt ? new Date(r.lastClickAt).toLocaleString("pt-BR") : "—"];
       }),
       styles: { fontSize: 9 },
