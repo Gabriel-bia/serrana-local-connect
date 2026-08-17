@@ -212,14 +212,16 @@ function ReportsPage() {
         <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
           <h2 className="mb-4 text-lg font-bold">Prévia do relatório</h2>
           {error ? (
-            <p className="text-sm text-destructive">Erro ao carregar. Atualize a sessão.</p>
+            <p className="text-sm text-destructive">
+              Não foi possível gerar o relatório: {(error as Error).message}
+            </p>
           ) : isLoading || !data ? (
             <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : (
             <ReportPreview
               data={data}
-              stores={stores}
-              categories={categories}
+              entities={entities}
+              noun={noun}
               selectedStoreId={storeId}
               storeLabel={storeLabel}
               periodLabel={periodLabel}
