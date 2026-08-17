@@ -275,30 +275,31 @@ function ReportsPage() {
 
 function ReportPreview({
   data,
-  stores,
-  categories,
+  entities,
+  noun,
   selectedStoreId,
   storeLabel,
   periodLabel,
 }: {
   data: StoreReportResult;
-  stores: ReturnType<typeof useData>["stores"];
-  categories: ReturnType<typeof useData>["categories"];
+  entities: ReportEntity[];
+  noun: string;
   selectedStoreId: string;
   storeLabel: string;
   periodLabel: string;
 }) {
   const avg = data.totals.averagePerStore;
-  const selected = selectedStoreId !== "all" ? stores.find((s) => s.id === selectedStoreId) : null;
+  const selected = selectedStoreId !== "all" ? entities.find((s) => s.id === selectedStoreId) : null;
   const selectedRow = selected ? data.rows.find((r) => r.storeId === selected.id) : null;
   const selectedCount = selectedRow?.total ?? 0;
 
   const observation =
     selectedStoreId === "all"
-      ? `Total de ${data.totals.all} cliques distribuídos entre ${data.totals.storesWithClicks} loja(s). Média por loja: ${avg.toFixed(1)}.`
+      ? `Total de ${data.totals.all} cliques distribuídos entre ${data.totals.storesWithClicks} ${noun}(s). Média por ${noun}: ${avg.toFixed(1)}.`
       : selectedCount >= avg
-      ? "Parabéns! Sua loja está apresentando excelente desempenho e atraindo muitos clientes."
-      : "Há oportunidades para aumentar a visibilidade da sua loja. Considere atualizar suas publicações e ofertas.";
+      ? "Parabéns! O desempenho está acima da média, atraindo muitos clientes."
+      : "Há oportunidades para aumentar a visibilidade. Considere atualizar as publicações e ofertas.";
+
 
   return (
     <div className="space-y-6">
