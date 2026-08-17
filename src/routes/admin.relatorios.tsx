@@ -359,8 +359,8 @@ function ReportPreview({
             </thead>
             <tbody>
               {data.rows.map((r) => {
-                const st = stores.find((s) => s.id === r.storeId);
-                const cat = st ? categories.find((c) => c.id === st.categoryId)?.name : "—";
+                const st = entities.find((s) => s.id === r.storeId);
+                const cat = st ? st.categoryName : "—";
                 return (
                   <tr key={r.storeId} className="border-t border-border">
                     <td className="p-2 font-medium">{r.storeName}</td>
