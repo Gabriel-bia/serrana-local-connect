@@ -454,22 +454,22 @@ async function exportPDF({
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(80, 80, 80);
-  doc.text(`Loja: ${storeLabel}`, 34, 26);
+  doc.text(`${noun === "prestador" ? "Prestador" : "Loja"}: ${storeLabel}`, 34, 26);
   doc.text(`Período: ${periodLabel}`, 34, 31);
   doc.text(`Gerado em: ${new Date(data.generatedAt).toLocaleString("pt-BR")}`, 34, 36);
 
   let y = 46;
-  const selected = selectedStoreId !== "all" ? stores.find((s) => s.id === selectedStoreId) : null;
+  const selected = selectedStoreId !== "all" ? entities.find((s) => s.id === selectedStoreId) : null;
   const avg = data.totals.averagePerStore;
 
   if (selected) {
     const row = data.rows.find((r) => r.storeId === selected.id);
-    const cat = categories.find((c) => c.id === selected.categoryId)?.name ?? "—";
+    const cat = selected.categoryName;
     autoTable(doc, {
       startY: y,
       head: [["Campo", "Valor"]],
       body: [
-        ["Nome da loja", selected.name],
+        [noun === "prestador" ? "Nome do prestador" : "Nome da loja", selected.name],
         ["Categoria", cat],
         ["Quantidade de cliques no WhatsApp", String(row?.total ?? 0)],
         ["Visualizações", "Métrica em implantação"],
@@ -511,8 +511,8 @@ async function exportPDF({
       startY: y,
       head: [["Loja", "Categoria", "Cliques", "Último clique"]],
       body: data.rows.map((r) => {
-        const st = stores.find((s) => s.id === r.storeId);
-        const cat = st ? categories.find((c) => c.id === st.categoryId)?.name ?? "—" : "—";
+        const st = entities.find((s) => s.id === r.storeId);
+        const cat = st ? st.categoryName : "—";
         return [r.storeName, cat, String(r.total), r.lastClickAt ? new Date(r.lastClickAt).toLocaleString("pt-BR") : "—"];
       }),
       styles: { fontSize: 9 },
