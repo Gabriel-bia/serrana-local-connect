@@ -320,8 +320,8 @@ function ReportPreview({
 
       {selected ? (
         <div className="grid gap-4 md:grid-cols-2">
-          <Info label="Loja" value={selected.name} />
-          <Info label="Categoria" value={categories.find((c) => c.id === selected.categoryId)?.name ?? "—"} />
+          <Info label={noun === "prestador" ? "Prestador" : "Loja"} value={selected.name} />
+          <Info label="Categoria" value={selected.categoryName} />
           <Info label="Cliques no WhatsApp" value={selectedCount.toLocaleString("pt-BR")} highlight />
           <Info label="Visualizações" value="Métrica em implantação" />
           <Info
