@@ -420,15 +420,15 @@ function computeRange(period: Period, customStart: string, customEnd: string) {
 
 async function exportPDF({
   data,
-  stores,
-  categories,
+  entities,
+  noun,
   selectedStoreId,
   periodLabel,
   storeLabel,
 }: {
   data: StoreReportResult;
-  stores: ReturnType<typeof useData>["stores"];
-  categories: ReturnType<typeof useData>["categories"];
+  entities: ReportEntity[];
+  noun: string;
   selectedStoreId: string;
   periodLabel: string;
   storeLabel: string;
