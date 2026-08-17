@@ -30,8 +30,12 @@ type HistoryEntry = {
   total: number;
 };
 
+type Kind = "stores" | "providers";
+export type ReportEntity = { id: string; name: string; categoryName: string };
+
 function ReportsPage() {
-  const { stores, categories } = useData();
+  const { stores, categories, providers, serviceCategories } = useData();
+  const [kind, setKind] = useState<Kind>("stores");
   const [storeId, setStoreId] = useState<string>("all");
   const [period, setPeriod] = useState<Period>("30d");
   const [customStart, setCustomStart] = useState<string>("");
@@ -45,21 +49,57 @@ function ReportsPage() {
     } catch {}
   }, []);
 
+  const entities: ReportEntity[] = useMemo(() => {
+    if (kind === "providers") {
+      return providers.map((p) => ({
+        id: p.id,
+        name: p.name,
+        categoryName:
+          (p.categoryIds ?? [])
+            .map((cid) => serviceCategories.find((c) => c.id === cid)?.name)
+            .filter(Boolean)
+            .join(", ") || "—",
+      }));
+    }
+    return stores.map((s) => ({
+      id: s.id,
+      name: s.name,
+      categoryName: categories.find((c) => c.id === s.categoryId)?.name ?? "—",
+    }));
+  }, [kind, stores, categories, providers, serviceCategories]);
+
+  const entityIds = useMemo(() => entities.map((e) => e.id), [entities]);
+  const noun = kind === "providers" ? "prestador" : "loja";
+  const nounPlural = kind === "providers" ? "prestadores" : "lojas";
+
+  useEffect(() => {
+    setStoreId("all");
+  }, [kind]);
+
   const { startDate, endDate, periodLabel } = useMemo(() => computeRange(period, customStart, customEnd), [period, customStart, customEnd]);
 
   const fetchReport = useServerFn(getStoreReport);
   const { data, isLoading, isFetching, refetch, error } = useQuery({
-    queryKey: ["store-report", storeId, startDate, endDate],
-    queryFn: () => fetchReport({ data: { storeId: storeId === "all" ? null : storeId, startDate, endDate } }),
+    queryKey: ["store-report", kind, storeId, startDate, endDate, entityIds.length],
+    queryFn: () =>
+      fetchReport({
+        data: {
+          storeId: storeId === "all" ? null : storeId,
+          startDate,
+          endDate,
+          entityIds: storeId === "all" ? entityIds : null,
+        },
+      }),
+    enabled: entityIds.length > 0 || storeId !== "all",
     retry: 1,
   });
 
-  const selectedStore = storeId === "all" ? null : stores.find((s) => s.id === storeId) ?? null;
-  const storeLabel = selectedStore ? selectedStore.name : "Todas as lojas";
+  const selectedStore = storeId === "all" ? null : entities.find((s) => s.id === storeId) ?? null;
+  const storeLabel = selectedStore ? selectedStore.name : `Todos os ${nounPlural}`;
 
   const onExportPDF = async () => {
     if (!data) return;
-    await exportPDF({ data, stores, categories, selectedStoreId: storeId, periodLabel, storeLabel });
+    await exportPDF({ data, entities, selectedStoreId: storeId, periodLabel, storeLabel, noun });
     const entry: HistoryEntry = {
       id: crypto.randomUUID(),
       generatedAt: new Date().toISOString(),
@@ -81,23 +121,36 @@ function ReportsPage() {
         <a href="/admin" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Voltar ao painel
         </a>
-        <h1 className="mt-1 text-3xl font-bold">Relatórios por Loja</h1>
-        <p className="text-sm text-muted-foreground">Gere relatórios individuais ou gerais e exporte em PDF.</p>
+        <h1 className="mt-1 text-3xl font-bold">Relatórios</h1>
+        <p className="text-sm text-muted-foreground">Gere relatórios de lojas ou prestadores de serviço e exporte em PDF.</p>
 
-        <div className="mt-6 grid gap-4 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] md:grid-cols-[1fr_1fr_auto]">
+        <div className="mt-6 grid gap-4 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] md:grid-cols-[1fr_1fr_1fr_auto]">
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">Loja</span>
+            <span className="text-xs font-medium text-muted-foreground">Tipo</span>
+            <select
+              value={kind}
+              onChange={(e) => setKind(e.target.value as Kind)}
+              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="stores">Lojas</option>
+              <option value="providers">Prestadores de serviço</option>
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-xs font-medium text-muted-foreground">{kind === "providers" ? "Prestador" : "Loja"}</span>
             <select
               value={storeId}
               onChange={(e) => setStoreId(e.target.value)}
               className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="all">Todas as lojas (relatório geral)</option>
-              {stores.map((s) => (
+              <option value="all">Todos os {nounPlural} (relatório geral)</option>
+              {entities.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
                 </option>
               ))}
+
             </select>
           </label>
 
