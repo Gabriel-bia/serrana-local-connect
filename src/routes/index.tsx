@@ -39,6 +39,25 @@ function Index() {
     serviceCategories,
   } = useData();
   const [q, setQ] = useState("");
+  const navigate = useNavigate();
+  const secretTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelSecretPress = useCallback(() => {
+    if (secretTimer.current) {
+      clearTimeout(secretTimer.current);
+      secretTimer.current = null;
+    }
+  }, []);
+
+  const startSecretPress = useCallback(() => {
+    cancelSecretPress();
+    secretTimer.current = setTimeout(() => {
+      secretTimer.current = null;
+      navigate({ to: "/auth", search: { redirect: "/dashboard" } });
+    }, 3000);
+  }, [cancelSecretPress, navigate]);
+
+  useEffect(() => cancelSecretPress, [cancelSecretPress]);
 
   const stores = allStores.filter((s) => !s.blocked);
   const visibleStoreIds = new Set(stores.map((s) => s.id));
