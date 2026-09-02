@@ -40,7 +40,6 @@ export function Header() {
           <Link to="/produtos" className="px-3 py-2 rounded-md hover:bg-muted">Produtos</Link>
           <Link to="/categorias" className="px-3 py-2 rounded-md hover:bg-muted">Categoria Produtos</Link>
           <Link to="/prestadores" className="px-3 py-2 rounded-md hover:bg-muted">Prestadores</Link>
-          <Link to="/dashboard" className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground">Dashboard</Link>
         </nav>
 
         <button
