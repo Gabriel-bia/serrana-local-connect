@@ -49,11 +49,14 @@ function Index() {
     }
   }, []);
 
-  const startSecretPress = useCallback(() => {
+  const startSecretPress = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
     cancelSecretPress();
     secretTimer.current = setTimeout(() => {
       secretTimer.current = null;
-      navigate({ to: "/auth", search: { redirect: "/dashboard" } });
+      navigate({ to: "/dashboard" });
     }, 3000);
   }, [cancelSecretPress, navigate]);
 
@@ -108,24 +111,33 @@ function Index() {
       {/* Hero */}
       <section className="relative bg-white">
         <div className="relative">
-          <a href="/categorias" className="block">
-            <img
-              src={heroBanner.url}
-              alt="Serrana Express — Encontre produtos e serviços da sua cidade em um só lugar"
-              className="w-full h-auto object-cover"
-              width={1600}
-              height={900}
-            />
-          </a>
+          <img
+            src={heroBanner.url}
+            alt="Serrana Express — Encontre produtos e serviços da sua cidade em um só lugar"
+            className="block w-full h-auto object-cover"
+            width={1600}
+            height={900}
+          />
           {/* Acesso administrativo oculto: pressione e segure por 3s */}
-          <span
+          <button
+            type="button"
+            tabIndex={-1}
             aria-hidden="true"
             onPointerDown={startSecretPress}
-            onPointerUp={cancelSecretPress}
+            onPointerUp={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              cancelSecretPress();
+            }}
             onPointerLeave={cancelSecretPress}
             onPointerCancel={cancelSecretPress}
+            onLostPointerCapture={cancelSecretPress}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
             onContextMenu={(e) => e.preventDefault()}
-            className="absolute right-0 top-0 h-[18%] w-[18%] cursor-default select-none bg-transparent"
+            className="absolute right-0 top-0 z-20 h-[18%] w-[18%] cursor-default select-none border-0 bg-transparent p-0 outline-none"
             style={{ WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
           />
         </div>
