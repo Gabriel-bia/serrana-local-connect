@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Search, ShoppingBag, Store as StoreIcon, Wrench, MapPin } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import * as Icons from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -88,15 +88,29 @@ function Index() {
 
       {/* Hero */}
       <section className="relative bg-white">
-        <a href="/categorias" className="block">
-          <img
-            src={heroBanner.url}
-            alt="Serrana Express — Encontre produtos e serviços da sua cidade em um só lugar"
-            className="w-full h-auto object-cover"
-            width={1600}
-            height={900}
+        <div className="relative">
+          <a href="/categorias" className="block">
+            <img
+              src={heroBanner.url}
+              alt="Serrana Express — Encontre produtos e serviços da sua cidade em um só lugar"
+              className="w-full h-auto object-cover"
+              width={1600}
+              height={900}
+            />
+          </a>
+          {/* Acesso administrativo oculto: pressione e segure por 3s */}
+          <span
+            aria-hidden="true"
+            onPointerDown={startSecretPress}
+            onPointerUp={cancelSecretPress}
+            onPointerLeave={cancelSecretPress}
+            onPointerCancel={cancelSecretPress}
+            onContextMenu={(e) => e.preventDefault()}
+            className="absolute right-0 top-0 h-[18%] w-[18%] cursor-default select-none bg-transparent"
+            style={{ WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
           />
-        </a>
+        </div>
+
 
         <div className="container mx-auto px-4 -mt-4 md:-mt-8 relative z-10">
           <form
