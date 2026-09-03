@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LojasRouteImport } from './routes/lojas'
 import { Route as PrestadoresRouteImport } from './routes/prestadores'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
@@ -46,6 +47,11 @@ const CategoriasRoute = CategoriasRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojasRoute = LojasRouteImport.update({
+  id: '/lojas',
+  path: '/lojas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrestadoresRoute = PrestadoresRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/lojas': typeof LojasRoute
   '/prestadores': typeof PrestadoresRoute
   '/produtos': typeof ProdutosRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/lojas': typeof LojasRoute
   '/prestadores': typeof PrestadoresRoute
   '/produtos': typeof ProdutosRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/lojas': typeof LojasRoute
   '/prestadores': typeof PrestadoresRoute
   '/produtos': typeof ProdutosRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/categorias'
     | '/dashboard'
+    | '/lojas'
     | '/prestadores'
     | '/produtos'
     | '/admin/relatorios'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/categorias'
     | '/dashboard'
+    | '/lojas'
     | '/prestadores'
     | '/produtos'
     | '/admin/relatorios'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/categorias'
     | '/dashboard'
+    | '/lojas'
     | '/prestadores'
     | '/produtos'
     | '/admin/relatorios'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CategoriasRoute: typeof CategoriasRoute
   DashboardRoute: typeof DashboardRoute
+  LojasRoute: typeof LojasRoute
   PrestadoresRoute: typeof PrestadoresRoute
   ProdutosRoute: typeof ProdutosRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lojas': {
+      id: '/lojas'
+      path: '/lojas'
+      fullPath: '/lojas'
+      preLoaderRoute: typeof LojasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/prestadores': {
@@ -311,6 +331,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CategoriasRoute: CategoriasRoute,
   DashboardRoute: DashboardRoute,
+  LojasRoute: LojasRoute,
   PrestadoresRoute: PrestadoresRoute,
   ProdutosRoute: ProdutosRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,

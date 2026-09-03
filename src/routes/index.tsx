@@ -25,7 +25,7 @@ export const Route = createFileRoute("/")({
 
 const shortcuts = [
   { icon: ShoppingBag, label: "Produtos", href: "/produtos" },
-  { icon: StoreIcon, label: "Lojas", href: "/categorias" },
+  { icon: StoreIcon, label: "Lojas", href: "/lojas" },
   { icon: Wrench, label: "Serviços", href: "/prestadores" },
   { icon: MapPin, label: "Perto de Você", href: "/categorias" },
 ];
