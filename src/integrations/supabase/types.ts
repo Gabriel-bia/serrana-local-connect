@@ -14,6 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_requests: {
+        Row: {
+          approved_at: string | null
+          assignee: string
+          client_id: string | null
+          code: number
+          completed_at: string | null
+          created_at: string
+          current_data: Json
+          description: string
+          id: string
+          notes: string
+          origin: string
+          requested_data: Json
+          status: string
+          store_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          assignee?: string
+          client_id?: string | null
+          code?: number
+          completed_at?: string | null
+          created_at?: string
+          current_data?: Json
+          description?: string
+          id?: string
+          notes?: string
+          origin?: string
+          requested_data?: Json
+          status?: string
+          store_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          assignee?: string
+          client_id?: string | null
+          code?: number
+          completed_at?: string | null
+          created_at?: string
+          current_data?: Json
+          description?: string
+          id?: string
+          notes?: string
+          origin?: string
+          requested_data?: Json
+          status?: string
+          store_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_requests_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_log: {
+        Row: {
+          action: string
+          actor: string
+          actor_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_table: string
+          id: string
+          origin: string
+          request_id: string | null
+          summary: string
+        }
+        Insert: {
+          action: string
+          actor?: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_table?: string
+          id?: string
+          origin?: string
+          request_id?: string | null
+          summary?: string
+        }
+        Update: {
+          action?: string
+          actor?: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_table?: string
+          id?: string
+          origin?: string
+          request_id?: string | null
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "admin_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       banners: {
         Row: {
           created_at: string
@@ -70,6 +195,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      clients: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string
+          phone: string | null
+          store_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string
+          phone?: string | null
+          store_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string
+          phone?: string | null
+          store_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -414,6 +580,69 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          assignee: string
+          client_id: string | null
+          completed_at: string | null
+          created_at: string
+          description: string
+          due_date: string | null
+          id: string
+          notes: string
+          priority: string
+          status: string
+          store_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee?: string
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          notes?: string
+          priority?: string
+          status?: string
+          store_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee?: string
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          notes?: string
+          priority?: string
+          status?: string
+          store_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -464,6 +693,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_edit: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -471,6 +701,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "operator" | "viewer"
