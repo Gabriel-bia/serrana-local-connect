@@ -287,17 +287,37 @@ let loadPromise: Promise<void> | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sbAny = supabase as any;
 
+/** Tabelas que falharam no carregamento e precisam ser tentadas de novo. */
+const failedTables = new Set<keyof DataShape>();
+
 /** Carrega uma tabela e atualiza o estado imediatamente (render progressivo). */
-async function loadTable(key: keyof DataShape): Promise<void> {
+async function loadTable(key: keyof DataShape, attempts = 3): Promise<void> {
   const cfg = map[key];
-  const { data, error } = await sbAny.from(cfg.table).select("*");
-  if (error) {
-    console.error(`[store] load ${cfg.table} failed`, error.message);
-    return;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const { data, error } = await sbAny.from(cfg.table).select("*");
+      if (error) throw new Error(error.message);
+      const rows = (data ?? []) as Row[];
+      state = { ...state, [key]: rows.map((r) => cfg.fromRow(r)) as DataShape[typeof key] };
+      failedTables.delete(key);
+      notify();
+      return;
+    } catch (err) {
+      if (i === attempts - 1) {
+        failedTables.add(key);
+        console.error(`[store] load ${cfg.table} failed`, err);
+      } else {
+        await new Promise((r) => setTimeout(r, 600 * (i + 1)));
+      }
+    }
   }
-  const rows = (data ?? []) as Row[];
-  state = { ...state, [key]: rows.map((r) => cfg.fromRow(r)) as DataShape[typeof key] };
-  notify();
+}
+
+/** Tenta de novo as tabelas que falharam (ao voltar a conexão / aba ativa). */
+function retryFailed() {
+  if (failedTables.size === 0) return;
+  const keys = [...failedTables];
+  Promise.all(keys.map((k) => loadTable(k, 2))).catch(() => undefined);
 }
 
 async function loadAll(): Promise<void> {
@@ -318,6 +338,7 @@ async function loadAll(): Promise<void> {
   notify();
   await Promise.all(rest.map((k) => loadTable(k)));
 }
+
 
 export function useDataReady(): boolean {
   return useSyncExternalStore(
