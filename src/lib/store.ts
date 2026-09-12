@@ -380,7 +380,13 @@ function ensureLoaded() {
     );
   });
   channel.subscribe();
+
+  window.addEventListener("online", retryFailed);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") retryFailed();
+  });
 }
+
 
 
 ensureLoaded();
