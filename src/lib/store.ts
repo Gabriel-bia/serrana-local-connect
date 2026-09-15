@@ -400,6 +400,22 @@ export function useData(): DataShape {
   );
 }
 
+/** Envia imagens embutidas (data URL) para o armazenamento e devolve a linha com URLs. */
+async function uploadEmbeddedImages(table: string, row: Row): Promise<Row> {
+  const out: Row = { ...row };
+  const uploads = Object.entries(out).map(async ([field, value]) => {
+    if (typeof value !== "string" || !value.startsWith("data:image/")) return;
+    try {
+      const { url } = await uploadCatalogImage({ data: { dataUrl: value, table } });
+      out[field] = url;
+    } catch (err) {
+      console.error(`[store] upload image ${table}.${field} failed`, err);
+ecod }
+  });
+  await Promise.all(uploads);
+  return out;
+}
+
 export const dataApi = {
   get: () => state,
   ready: () => loadPromise ?? Promise.resolve(),
