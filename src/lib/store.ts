@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadCatalogImage } from "@/lib/catalog.functions";
 import type {
   Banner,
   Category,
@@ -399,12 +400,31 @@ export function useData(): DataShape {
   );
 }
 
+/** Envia imagens embutidas (data URL) para o armazenamento e devolve a linha com URLs. */
+async function uploadEmbeddedImages(table: string, row: Row): Promise<Row> {
+  const out: Row = { ...row };
+  const uploads = Object.entries(out).map(async ([field, value]) => {
+    if (typeof value !== "string" || !value.startsWith("data:image/")) return;
+    try {
+      const { url } = await uploadCatalogImage({ data: { dataUrl: value, table } });
+      out[field] = url;
+    } catch (err) {
+      console.error(`[store] upload image ${table}.${field} failed`, err);
+    }
+  });
+  await Promise.all(uploads);
+  return out;
+}
+
 export const dataApi = {
   get: () => state,
   ready: () => loadPromise ?? Promise.resolve(),
   reload: () => loadAll(),
   async upsert<K extends keyof DataShape>(key: K, item: DataShape[K][number]) {
     const cfg = map[key];
+    // Imagens embutidas (data URL) vão para o armazenamento de arquivos antes de salvar,
+    // para o banco e a página inicial continuarem leves.
+    const row = await uploadEmbeddedImages(cfg.table, cfg.toRow(item as never));
     // optimistic local update
     const arr = state[key] as Array<{ id: string }>;
     const idx = arr.findIndex((x) => x.id === (item as { id: string }).id);
@@ -413,7 +433,7 @@ export const dataApi = {
     else next.push(item as never);
     state = { ...state, [key]: next as DataShape[K] };
     notify();
-    const { error } = await sbAny.from(cfg.table).upsert(cfg.toRow(item as never));
+    const { error } = await sbAny.from(cfg.table).upsert(row);
     if (error) {
       console.error(`[store] upsert ${key} failed`, error);
       toast.error(`Falha ao salvar: ${error.message}`);

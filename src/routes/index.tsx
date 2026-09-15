@@ -6,7 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CategoryCarousel } from "@/components/CategoryCarousel";
 import { ProviderCarousel } from "@/components/ProviderCarousel";
-import { useData } from "@/lib/store";
+import { loadPriorityCatalog } from "@/lib/catalog.functions";
 import heroBanner from "@/assets/hero-banner-serrana-v2.png.asset.json";
 
 
@@ -20,6 +20,12 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: heroBanner.url },
     ],
   }),
+  // Carrega o catálogo no servidor: o primeiro HTML já vem com produtos e lojas.
+  loader: async () => loadPriorityCatalog(),
+  pendingMs: 0,
+  pendingComponent: LoadingScreen,
+  errorComponent: CatalogError,
+  notFoundComponent: LoadingScreen,
   component: Index,
 });
 
@@ -30,6 +36,46 @@ const shortcuts = [
   { icon: MapPin, label: "Perto de Você", href: "/categorias" },
 ];
 
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-background px-4 text-center">
+      <span className="inline-flex h-20 w-20 animate-pulse items-center justify-center rounded-2xl bg-primary text-3xl font-extrabold text-primary-foreground shadow-[var(--shadow-glow)]">
+        SE
+      </span>
+      <div className="space-y-1">
+        <p className="text-lg font-semibold text-foreground sm:text-xl">
+          Personalizando os melhores produtos para você
+        </p>
+        <p className="text-sm text-muted-foreground">Serrana Express — preparando o catálogo…</p>
+      </div>
+      <div className="h-1 w-44 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+        <div className="h-full w-1/3 rounded-full bg-primary [animation:loading-slide_1.1s_ease-in-out_infinite]" />
+      </div>
+      <style>{`@keyframes loading-slide { 0% { transform: translateX(-110%); } 100% { transform: translateX(340%); } }`}</style>
+    </div>
+  );
+}
+
+function CatalogError({ reset }: { error: Error; reset: () => void }) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-5 bg-background px-4 text-center">
+      <span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-2xl font-extrabold text-primary-foreground">
+        SE
+      </span>
+      <p className="text-lg font-semibold text-foreground">
+        Não foi possível carregar o catálogo agora.
+      </p>
+      <p className="text-sm text-muted-foreground">Verifique sua conexão e tente novamente.</p>
+      <button
+        onClick={reset}
+        className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+      >
+        Tentar novamente
+      </button>
+    </div>
+  );
+}
+
 function Index() {
   const {
     categories,
@@ -37,7 +83,7 @@ function Index() {
     products: allProducts,
     providers: allProviders,
     serviceCategories,
-  } = useData();
+  } = Route.useLoaderData();
   const [q, setQ] = useState("");
   const navigate = useNavigate();
   const secretTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
