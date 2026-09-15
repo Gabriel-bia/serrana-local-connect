@@ -410,7 +410,7 @@ async function uploadEmbeddedImages(table: string, row: Row): Promise<Row> {
       out[field] = url;
     } catch (err) {
       console.error(`[store] upload image ${table}.${field} failed`, err);
-ecod }
+    }
   });
   await Promise.all(uploads);
   return out;
@@ -425,6 +425,14 @@ export const dataApi = {
     // Imagens embutidas (data URL) vão para o armazenamento de arquivos antes de salvar,
     // para o banco e a página inicial continuarem leves.
     const row = await uploadEmbeddedImages(cfg.table, cfg.toRow(item as never));
+    // optimistic local update
+    const arr = state[key] as Array<{ id: string }>;
+    const idx = arr.findIndex((x) => x.id === (item as { id: string }).id);
+    const next = [...arr];
+    if (idx >= 0) next[idx] = item as never;
+    else next.push(item as never);
+    state = { ...state, [key]: next as DataShape[K] };
+    notify();
     const { error } = await sbAny.from(cfg.table).upsert(row);
     if (error) {
       console.error(`[store] upsert ${key} failed`, error);
