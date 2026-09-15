@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadCatalogImage } from "@/lib/catalog.functions";
 import type {
   Banner,
   Category,
@@ -405,15 +406,10 @@ export const dataApi = {
   reload: () => loadAll(),
   async upsert<K extends keyof DataShape>(key: K, item: DataShape[K][number]) {
     const cfg = map[key];
-    // optimistic local update
-    const arr = state[key] as Array<{ id: string }>;
-    const idx = arr.findIndex((x) => x.id === (item as { id: string }).id);
-    const next = [...arr];
-    if (idx >= 0) next[idx] = item as never;
-    else next.push(item as never);
-    state = { ...state, [key]: next as DataShape[K] };
-    notify();
-    const { error } = await sbAny.from(cfg.table).upsert(cfg.toRow(item as never));
+    // Imagens embutidas (data URL) vão para o armazenamento de arquivos antes de salvar,
+    // para o banco e a página inicial continuarem leves.
+    const row = await uploadEmbeddedImages(cfg.table, cfg.toRow(item as never));
+    const { error } = await sbAny.from(cfg.table).upsert(row);
     if (error) {
       console.error(`[store] upsert ${key} failed`, error);
       toast.error(`Falha ao salvar: ${error.message}`);
