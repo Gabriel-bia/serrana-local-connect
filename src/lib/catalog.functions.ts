@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import type {
   Banner,
@@ -154,3 +155,43 @@ function emptyCatalog(): CatalogData {
     products: [],
   };
 }
+
+/**
+ * Faz upload de uma imagem (data URL) para o bucket público de catálogo.
+ * Somente administradores autenticados podem chamar.
+ */
+export const uploadCatalogImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (data: { dataUrl: string; table: string }) =>
+      data as { dataUrl: string; table: string },
+  )
+  .handler(async ({ data, context }) => {
+    const { dataUrl, table } = data;
+    if (!/^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(dataUrl)) {
+      throw new Error("Formato de imagem inválido.");
+    }
+    if (!/^[a-z_]+$/.test(table)) {
+      throw new Error("Tabela inválida.");
+    }
+
+    const { data: isAdmin } = await context.supabase
+      .rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito a administradores.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const m = /^data:([^;,]+)?;base64,(.*)$/s.exec(dataUrl)!;
+    const mime = m[1] || "image/jpeg";
+    const kind = mime.split("/")[1].toLowerCase();
+    const ext = kind === "jpeg" ? "jpg" : kind === "svg+xml" ? "svg" : kind;
+    const path = `${table}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const bytes = Buffer.from(m[2], "base64");
+
+    const { error } = await supabaseAdmin.storage
+      .from("catalog-images")
+      .upload(path, bytes, { contentType: mime, upsert: true });
+    if (error) throw new Error(error.message);
+
+    return { url: supabaseAdmin.storage.from("catalog-images").getPublicUrl(path).data.publicUrl };
+  });
