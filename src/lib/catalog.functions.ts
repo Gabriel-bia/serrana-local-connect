@@ -66,7 +66,7 @@ export const loadPriorityCatalog = createServerFn({ method: "GET" }).handler(
 
     const rows = (r: { data: unknown[] | null; error: { message: string } | null }): Row[] => {
       if (r.error) console.error("[catalog] query failed:", r.error.message);
-      return ((r.data ?? []) as Row[]) ?? [];
+      return (r.data ?? []) as Row[];
     };
 
     return {
