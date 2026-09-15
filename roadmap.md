@@ -7,4 +7,4 @@
 - [x] Salvamentos futuros enviam imagens ao armazenamento automaticamente (uploadCatalogImage + dataApi)
 - [x] Tela de carregamento com logo SE e mensagem "Personalizando os melhores produtos para você"
 - [x] Typecheck sem erros
-- [ ] Validar a página inicial no navegador (em andamento)
+- [x] Validar a página inicial no navegador (sem erros; produtos e prestadores aparecem)
