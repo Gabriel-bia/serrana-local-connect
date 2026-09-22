@@ -68,13 +68,9 @@ function AuthPage() {
       <Header />
       <main className="container mx-auto flex-1 grid place-items-center px-4 py-16">
         <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-          <h1 className="text-2xl font-bold">
-            {mode === "signin" ? "Entrar" : "Criar conta"}
-          </h1>
+          <h1 className="text-2xl font-bold">Entrar</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "signin"
-              ? "Acesse o painel administrativo."
-              : "A primeira conta criada vira administrador automaticamente."}
+            Acesse o painel administrativo.
           </p>
 
           <form onSubmit={submit} className="mt-5 space-y-3">
