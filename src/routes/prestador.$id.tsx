@@ -138,7 +138,7 @@ function PrestadorPage() {
                 link={provider.whatsapp}
                 storeId={provider.id}
                 storeName={provider.name}
-                message={`Olá ${provider.name}! Encontrei você na Serrana Express.`}
+                message={`Olá, vim pelo app Serrana Express! Encontrei você, ${provider.name}.`}
                 label="WhatsApp"
                 className="!py-2.5"
               />
