@@ -55,7 +55,6 @@ export function ProductCard({ product, store }: { product: Product; store?: Stor
                 e.stopPropagation();
                 if (store) logWhatsappClick({ storeId: store.id, storeName: store.name });
                 window.open(
-                 window.open(
                   buildWhatsappLink(
                     waLink,
                     `Olá, vim pelo app Serrana Express! Tenho interesse no produto "${product.name}".`,
