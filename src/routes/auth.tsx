@@ -19,7 +19,6 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const { redirect } = Route.useSearch();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -34,17 +33,8 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin + "/admin" },
-        });
-        if (error) throw error;
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       toast.success("Tudo certo! Entrando…");
       navigate({ to: (redirect as string) || "/admin", replace: true });
     } catch (err) {
@@ -78,13 +68,9 @@ function AuthPage() {
       <Header />
       <main className="container mx-auto flex-1 grid place-items-center px-4 py-16">
         <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-          <h1 className="text-2xl font-bold">
-            {mode === "signin" ? "Entrar" : "Criar conta"}
-          </h1>
+          <h1 className="text-2xl font-bold">Entrar</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "signin"
-              ? "Acesse o painel administrativo."
-              : "A primeira conta criada vira administrador automaticamente."}
+            Acesse o painel administrativo.
           </p>
 
           <form onSubmit={submit} className="mt-5 space-y-3">
@@ -104,14 +90,14 @@ function AuthPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Senha"
-              autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              autoComplete="current-password"
               className="w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <button
               disabled={busy}
               className="w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
             >
-              {busy ? "Aguarde…" : mode === "signin" ? "Entrar" : "Criar conta"}
+              {busy ? "Aguarde…" : "Entrar"}
             </button>
           </form>
 
@@ -128,16 +114,6 @@ function AuthPage() {
             Entrar com Google
           </button>
 
-          <p className="mt-4 text-center text-sm">
-            {mode === "signin" ? "Não tem conta?" : "Já tem conta?"}{" "}
-            <button
-              type="button"
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-              className="font-semibold text-primary hover:underline"
-            >
-              {mode === "signin" ? "Criar conta" : "Entrar"}
-            </button>
-          </p>
         </div>
       </main>
       <Footer />
