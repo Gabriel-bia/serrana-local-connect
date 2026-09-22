@@ -49,7 +49,7 @@ function ProdutoPage() {
                 link={product.whatsapp || store.whatsapp}
                 storeId={store.id}
                 storeName={store.name}
-                message={`Olá! Tenho interesse no produto "${product.name}".`}
+                message={`Olá, vim pelo app Serrana Express! Tenho interesse no produto "${product.name}".`}
                 label="Falar com a loja"
                 className="w-full"
               />
