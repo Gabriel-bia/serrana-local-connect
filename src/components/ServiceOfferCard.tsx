@@ -56,11 +56,11 @@ export function ServiceOfferCard({
               window.open(
                 buildWhatsappLink(
                   waLink,
-                  `Olá! Tenho interesse no serviço "${service.name}".`,
+                  `Olá, vim pelo app Serrana Express! Tenho interesse no serviço "${service.name}".`,
                 ),
                 "_blank",
+                "noopener,noreferrer",
               );
-            }}
             className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-whatsapp)] px-3 py-2 text-xs font-semibold text-[var(--color-whatsapp-foreground)] shadow-sm transition hover:opacity-90"
           >
             <MessageCircle className="h-4 w-4" /> WhatsApp
