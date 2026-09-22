@@ -114,16 +114,6 @@ function AuthPage() {
             Entrar com Google
           </button>
 
-          <p className="mt-4 text-center text-sm">
-            {mode === "signin" ? "Não tem conta?" : "Já tem conta?"}{" "}
-            <button
-              type="button"
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-              className="font-semibold text-primary hover:underline"
-            >
-              {mode === "signin" ? "Criar conta" : "Entrar"}
-            </button>
-          </p>
         </div>
       </main>
       <Footer />
