@@ -55,10 +55,14 @@ export function ProductCard({ product, store }: { product: Product; store?: Stor
                 e.stopPropagation();
                 if (store) logWhatsappClick({ storeId: store.id, storeName: store.name });
                 window.open(
-                  buildWhatsappLink(waLink, `Olá! Tenho interesse no produto "${product.name}".`),
+                 window.open(
+                  buildWhatsappLink(
+                    waLink,
+                    `Olá, vim pelo app Serrana Express! Tenho interesse no produto "${product.name}".`,
+                  ),
                   "_blank",
+                  "noopener,noreferrer",
                 );
-              }}
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-whatsapp)] text-[var(--color-whatsapp-foreground)] shadow-sm transition hover:opacity-90"
               aria-label="Conversar no WhatsApp"
             >
