@@ -97,7 +97,7 @@ function AuthPage() {
               disabled={busy}
               className="w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
             >
-              {busy ? "Aguarde…" : mode === "signin" ? "Entrar" : "Criar conta"}
+              {busy ? "Aguarde…" : "Entrar"}
             </button>
           </form>
 
