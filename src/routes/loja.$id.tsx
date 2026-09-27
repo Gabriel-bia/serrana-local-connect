@@ -68,7 +68,14 @@ function LojaPage() {
                 )}
               </div>
             </div>
-            <WhatsAppButton link={store.whatsapp} storeId={store.id} storeName={store.name}message={`Olá, vim pelo app Serrana Express! Encontrei a loja ${store.name}.`}
+            <WhatsAppButton
+              link={store.whatsapp}
+              storeId={store.id}
+              storeName={store.name}
+              message={`Olá, vim pelo app Serrana Express! Encontrei a loja ${store.name}.`}
+            />
+          </div>
+
           <div className="mt-10 pb-10 space-y-10">
             {list.length === 0 && (
               <div className="rounded-xl border border-dashed p-12 text-center text-muted-foreground">
