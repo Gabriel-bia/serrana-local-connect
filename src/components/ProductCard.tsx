@@ -62,6 +62,7 @@ export function ProductCard({ product, store }: { product: Product; store?: Stor
                   "_blank",
                   "noopener,noreferrer",
                 );
+              }}
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-whatsapp)] text-[var(--color-whatsapp-foreground)] shadow-sm transition hover:opacity-90"
               aria-label="Conversar no WhatsApp"
             >
