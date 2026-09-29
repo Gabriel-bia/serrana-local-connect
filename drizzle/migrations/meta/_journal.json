@@ -15,6 +15,13 @@
       "when": 1788708577692,
       "tag": "0001_admin_ops_phase1",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790640223478,
+      "tag": "0002_restrict_media_read",
+      "breakpoints": true
     }
   ]
 }
