@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, type ErrorComponentProps } from "@tanstack/react-router";
 import { Search, ShoppingBag, Store as StoreIcon, Wrench, MapPin } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import * as Icons from "lucide-react";
@@ -56,7 +56,7 @@ function LoadingScreen() {
   );
 }
 
-function CatalogError({ reset }: { error: Error; reset: () => void }) {
+function CatalogError({ reset }: ErrorComponentProps) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-5 bg-background px-4 text-center">
       <span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-2xl font-extrabold text-primary-foreground">
