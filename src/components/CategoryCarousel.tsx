@@ -2,13 +2,16 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product, Store } from "@/data/seed";
 import { ProductCard } from "@/components/ProductCard";
+import { Button } from "@/components/ui/button";
 
 export function CategoryCarousel({
   products,
   storeById,
+  selection,
 }: {
   products: Product[];
   storeById: Record<string, Store>;
+  selection?: { active: boolean; ids: Set<string>; toggle: (id: string) => void };
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
@@ -86,24 +89,26 @@ export function CategoryCarousel({
   return (
     <div className="relative group">
       {canPrev && (
-        <button
+        <Button
+          variant="outline" size="icon"
           type="button"
           onClick={() => scrollBy(-1)}
           aria-label="Anterior"
-          className="hidden md:inline-flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white text-foreground shadow-lg ring-1 ring-black/5 hover:bg-primary hover:text-primary-foreground transition"
+          className="hidden md:inline-flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full shadow-[var(--shadow-card)]"
         >
           <ChevronLeft className="h-5 w-5" />
-        </button>
+        </Button>
       )}
       {canNext && (
-        <button
+        <Button
+          variant="outline" size="icon"
           type="button"
           onClick={() => scrollBy(1)}
           aria-label="Próximo"
-          className="hidden md:inline-flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white text-foreground shadow-lg ring-1 ring-black/5 hover:bg-primary hover:text-primary-foreground transition"
+          className="hidden md:inline-flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full shadow-[var(--shadow-card)]"
         >
           <ChevronRight className="h-5 w-5" />
-        </button>
+        </Button>
       )}
       <div
         ref={scrollerRef}
@@ -115,7 +120,7 @@ export function CategoryCarousel({
             key={p.id}
             className="snap-start shrink-0 w-[46%] sm:w-[31%] md:w-[23%] lg:w-[19%] xl:w-[16%]"
           >
-            <ProductCard product={p} store={storeById[p.storeId]} />
+            <ProductCard product={p} store={storeById[p.storeId]} selection={selection ? { active: selection.active, selected: selection.ids.has(p.id), toggle: () => selection.toggle(p.id) } : undefined} />
           </div>
         ))}
       </div>

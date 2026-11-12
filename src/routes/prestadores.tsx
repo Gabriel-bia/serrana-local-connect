@@ -18,6 +18,10 @@ export const Route = createFileRoute("/prestadores")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { property: "og:title", content: "Prestadores de Serviços — Serrana Express" },
+      { property: "og:description", content: "Conheça os profissionais e serviços locais da Serrana Express." },
       { title: "Prestadores de Serviços — Serrana Express" },
       {
         name: "description",

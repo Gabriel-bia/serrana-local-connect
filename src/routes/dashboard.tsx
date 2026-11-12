@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 import { AdminAuthGate } from "@/components/AdminAuthGate";
@@ -7,7 +8,7 @@ const AdminDashboardContent = lazy(() =>
 );
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Serrana Express" }] }),
+  head: () => pageHead("Dashboard — Serrana Express", "Painel de gestão de lojas, produtos e prestadores da Serrana Express."),
   component: DashboardPage,
 });
 

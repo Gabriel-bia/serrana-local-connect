@@ -8,6 +8,8 @@ import { CategoryCarousel } from "@/components/CategoryCarousel";
 import { ProviderCarousel } from "@/components/ProviderCarousel";
 import { loadPriorityCatalog } from "@/lib/catalog.functions";
 import heroBanner from "@/assets/hero-banner-serrana-v2.png.asset.json";
+import { useDiscovery } from "@/components/DiscoveryProvider";
+import { partitionProducts } from "@/lib/discovery";
 
 
 export const Route = createFileRoute("/")({
@@ -18,6 +20,9 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Serrana Express" },
       { property: "og:description", content: "Vitrine digital de produtos, lojas e serviços locais." },
       { property: "og:image", content: heroBanner.url },
+      { name: "twitter:image", content: heroBanner.url },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   // Carrega o catálogo no servidor: o primeiro HTML já vem com produtos e lojas.
@@ -34,7 +39,7 @@ const shortcuts = [
   { icon: StoreIcon, label: "Lojas", href: "/lojas" },
   { icon: Wrench, label: "Serviços", href: "/prestadores" },
   { icon: MapPin, label: "Perto de Você", href: "/categorias" },
-];
+] as const;
 
 function LoadingScreen() {
   return (
@@ -85,6 +90,7 @@ function Index() {
     serviceCategories,
   } = Route.useLoaderData();
   const [q, setQ] = useState("");
+  const { seed } = useDiscovery();
   const navigate = useNavigate();
   const secretTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -111,6 +117,7 @@ function Index() {
   const stores = allStores.filter((s) => !s.blocked);
   const visibleStoreIds = new Set(stores.map((s) => s.id));
   const products = allProducts.filter((p) => visibleStoreIds.has(p.storeId));
+  const { featured, common } = useMemo(() => partitionProducts(products, seed), [products, seed]);
   const providers = useMemo(() => allProviders.filter((p) => !p.blocked), [allProviders]);
   const storeById = useMemo(
     () => Object.fromEntries(stores.map((s) => [s.id, s])),
@@ -120,28 +127,27 @@ function Index() {
   // Agrupar produtos por categoria (dinâmico, ignora vazias)
   const sections = useMemo(() => {
     const byCat = new Map<string, typeof products>();
-    for (const p of products) {
-      if (!byCat.has(p.categoryId)) byCat.set(p.categoryId, []);
-      byCat.get(p.categoryId)!.push(p);
+    for (const p of common) {
+      const list = byCat.get(p.categoryId) ?? [];
+      list.push(p);
+      byCat.set(p.categoryId, list);
     }
     return categories
       .map((cat) => {
         const list = byCat.get(cat.id) ?? [];
-        const sorted = [...list].sort((a, b) =>
-          (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
-        );
-        return { category: cat, products: sorted.slice(0, 20) };
+        return { category: cat, products: list };
       })
       .filter((s) => s.products.length > 0);
-  }, [products, categories]);
+  }, [common, categories]);
 
   // Agrupar prestadores por categoria de serviço (dinâmico, ignora vazias)
   const providerSections = useMemo(() => {
     const byCat = new Map<string, typeof providers>();
     for (const p of providers) {
       for (const cid of p.categoryIds ?? []) {
-        if (!byCat.has(cid)) byCat.set(cid, []);
-        byCat.get(cid)!.push(p);
+        const list = byCat.get(cid) ?? [];
+        list.push(p);
+        byCat.set(cid, list);
       }
     }
     return serviceCategories
@@ -215,21 +221,28 @@ function Index() {
         <div className="container mx-auto px-4 pt-6 pb-8 md:pb-12">
           <div className="grid grid-cols-4 gap-2 sm:gap-4">
             {shortcuts.map((s) => (
-              <a key={s.label} href={s.href} className="flex flex-col items-center gap-2 text-center">
+              <Link key={s.label} to={s.href} className="flex flex-col items-center gap-2 text-center">
                 <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-primary shadow-[var(--shadow-card)] ring-1 ring-primary/20 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-glow)] sm:h-16 sm:w-16">
                   <s.icon className="h-6 w-6 sm:h-7 sm:w-7" />
                 </span>
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-foreground sm:text-xs">
                   {s.label}
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Seções por categoria (dinâmico) — produtos intercalados com prestadores */}
-      {sections.length === 0 && providerSections.length === 0 ? (
+      {featured.length > 0 && <section className="container mx-auto px-4 py-6" aria-label="Produtos em destaque">
+        <div className="mb-4 flex items-center gap-2">
+          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"><Icons.Star className="h-4 w-4" /></span>
+          <h2 className="text-lg font-bold sm:text-xl md:text-2xl">Produtos em destaque</h2>
+        </div>
+        <CategoryCarousel products={featured} storeById={storeById} />
+      </section>}
+      {/* Produtos comuns intercalados com prestadores */}
+      {sections.length === 0 && providerSections.length === 0 && featured.length === 0 ? (
         <section className="container mx-auto px-4 py-16 text-center">
           <p className="text-muted-foreground">Nenhum produto cadastrado ainda.</p>
         </section>

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +11,7 @@ import { useData } from "@/lib/store";
 import { getStoreReport, type StoreReportResult } from "@/lib/store-report.functions";
 
 export const Route = createFileRoute("/admin/relatorios")({
-  head: () => ({ meta: [{ title: "Relatórios por Loja — Serrana Express" }] }),
+  head: () => pageHead("Relatórios por Loja — Serrana Express", "Relatórios de contatos de lojas e prestadores da Serrana Express."),
   component: () => (
     <AdminAuthGate redirectToAfterLogin="/admin/relatorios">
       <ReportsPage />

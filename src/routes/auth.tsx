@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -12,7 +13,7 @@ const search = z.object({ redirect: z.string().optional() });
 
 export const Route = createFileRoute("/auth")({
   validateSearch: zodValidator(search),
-  head: () => ({ meta: [{ title: "Entrar — Serrana Express" }] }),
+  head: () => pageHead("Entrar — Serrana Express", "Acesso à área administrativa da Serrana Express."),
   component: AuthPage,
 });
 

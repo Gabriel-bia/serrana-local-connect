@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Outlet, useMatches, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
 import { Pencil, Plus, Trash2, LogOut, ExternalLink, Upload, Lock, Unlock, ChevronLeft } from "lucide-react";
@@ -8,7 +9,7 @@ import { dataApi, useData, formatPrice, isValidWhatsappLink } from "@/lib/store"
 import type { Banner, Category, Product, Service, ServiceCategory, Store, StoreCategory, Provider, ProviderService, ProviderWork } from "@/data/seed";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Serrana Express" }] }),
+  head: () => pageHead("Admin — Serrana Express", "Acesso à gestão administrativa da Serrana Express."),
   component: AdminPage,
 });
 

@@ -1,14 +1,18 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
+import { BackButton } from "@/components/BackButton";
 import { Search, Menu, X } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
+  const { pathname } = useLocation();
+  const showBack = ["/produtos", "/lojas", "/prestadores", "/categorias", "/auth"].includes(pathname);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="container mx-auto flex h-16 items-center gap-3 px-4">
+        {showBack && <BackButton />}
         <Link to="/" className="flex items-center gap-2 font-bold text-lg">
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-[var(--shadow-glow)]">
             SE

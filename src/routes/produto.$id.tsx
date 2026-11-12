@@ -3,18 +3,28 @@ import { ExternalLink, Store as StoreIcon, Tag } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import { useData, formatPrice } from "@/lib/store";
+import { useData, useDataReady, formatPrice } from "@/lib/store";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/produto/$id")({
+  head: ({ params }) => ({ meta: [
+    { title: `Produto ${params.id} — Serrana Express` },
+    { name: "description", content: "Confira preço e detalhes deste produto e fale com a loja na Serrana Express." },
+    { property: "og:title", content: `Produto ${params.id} — Serrana Express` },
+    { property: "og:description", content: "Veja os detalhes deste produto de uma loja local." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: ProdutoPage,
   notFoundComponent: () => (
-    <div className="min-h-screen grid place-items-center">Produto não encontrado</div>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4">Produto não encontrado<BackButton fallback="/produtos" /></div>
   ),
 });
 
 function ProdutoPage() {
   const { id } = Route.useParams();
+  const ready = useDataReady();
   const { products, stores, categories } = useData();
+  if (!ready) return <div className="min-h-screen grid place-items-center">Carregando produto…</div>;
   const product = products.find((p) => p.id === id);
   if (!product) throw notFound();
   const store = stores.find((s) => s.id === product.storeId);
@@ -25,6 +35,7 @@ function ProdutoPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="container mx-auto px-4 py-8 flex-1">
+        <BackButton fallback="/produtos" className="mb-4" />
         <div className="grid gap-8 md:grid-cols-2">
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
             <img src={product.image} alt={product.name} className="aspect-square w-full object-cover" />

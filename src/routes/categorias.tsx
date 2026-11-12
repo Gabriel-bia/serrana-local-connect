@@ -17,6 +17,10 @@ export const Route = createFileRoute("/categorias")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { property: "og:title", content: "Categorias — Serrana Express" },
+      { property: "og:description", content: "Explore os produtos das lojas locais por categoria." },
       { title: "Categorias — Serrana Express" },
       { name: "description", content: "Explore todas as categorias de produtos e serviços locais." },
     ],

@@ -1,48 +1,32 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { Instagram, Facebook, MapPin, Clock, Phone, Share2, ArrowLeft } from "lucide-react";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { Instagram, Facebook, MapPin, Clock, Phone } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ServiceOfferCard } from "@/components/ServiceOfferCard";
 import { WorkCard } from "@/components/WorkCard";
 import { useData, useDataReady } from "@/lib/store";
+import { BackButton } from "@/components/BackButton";
+import { ShareButton } from "@/components/ShareButton";
+import { publicProfileUrl } from "@/lib/discovery";
 
 export const Route = createFileRoute("/prestador/$id")({
+  head: ({ params }) => ({ meta: [
+    { title: `Prestador ${params.id} — Serrana Express` },
+    { name: "description", content: "Conheça os serviços e trabalhos deste profissional na Serrana Express." },
+    { property: "og:title", content: `Prestador ${params.id} — Serrana Express` },
+    { property: "og:description", content: "Confira os serviços e fale diretamente com este profissional." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: PrestadorPage,
   notFoundComponent: () => (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
       <p className="text-lg font-semibold">Prestador não encontrado</p>
-      <Link
-        to="/prestadores"
-        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90"
-      >
-        <ArrowLeft className="h-4 w-4" /> Voltar para prestadores
-      </Link>
+      <BackButton fallback="/prestadores" />
     </div>
   ),
 });
 
-
-async function shareProfile(name: string) {
-  if (typeof window === "undefined") return;
-  const url = window.location.href;
-  const nav = window.navigator;
-  const data = { title: name, text: `Conheça ${name} na Serrana Express`, url };
-  try {
-    if ("share" in nav && typeof nav.share === "function") {
-      await nav.share(data);
-      return;
-    }
-  } catch {
-    return;
-  }
-  try {
-    await nav.clipboard.writeText(url);
-    alert("Link do perfil copiado!");
-  } catch {
-    alert(url);
-  }
-}
 
 function PrestadorPage() {
   const { id } = Route.useParams();
@@ -72,12 +56,7 @@ function PrestadorPage() {
         <div className="relative h-48 md:h-64 overflow-hidden bg-muted">
           <img src={provider.cover} alt="" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-          <Link
-            to="/prestadores"
-            className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-lg bg-background/80 backdrop-blur-sm px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-background transition"
-          >
-            <ArrowLeft className="h-4 w-4" /> Voltar
-          </Link>
+          <BackButton fallback="/prestadores" className="absolute top-4 left-4" />
         </div>
         <div className="container mx-auto px-4 -mt-16 relative">
           <div className="flex flex-col md:flex-row gap-6 items-start rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
@@ -150,13 +129,7 @@ function PrestadorPage() {
                   <Phone className="h-5 w-5" /> Ligar
                 </a>
               )}
-              <button
-                type="button"
-                onClick={() => shareProfile(provider.name)}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 font-semibold text-foreground shadow-[var(--shadow-card)] transition hover:bg-muted"
-              >
-                <Share2 className="h-5 w-5" /> Compartilhar
-              </button>
+              <ShareButton title={provider.name} text={`Conheça ${provider.name} na Serrana Express`} url={publicProfileUrl("prestador", provider.id)} />
             </div>
           </div>
 

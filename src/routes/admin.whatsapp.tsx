@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -34,7 +35,7 @@ import { Footer } from "@/components/Footer";
 import { getWhatsappStats, type StoreClickStats } from "@/lib/whatsapp-stats.functions";
 
 export const Route = createFileRoute("/admin/whatsapp")({
-  head: () => ({ meta: [{ title: "Relatório de Cliques WhatsApp — Serrana Express" }] }),
+  head: () => pageHead("Relatório de Cliques WhatsApp — Serrana Express", "Estatísticas de contatos pelo WhatsApp na Serrana Express."),
   component: WhatsappReportPage,
 });
 
