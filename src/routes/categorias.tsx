@@ -36,7 +36,7 @@ function CategoriasPage() {
 
   const stores = useMemo(() => allStores.filter((s) => !s.blocked), [allStores]);
   const visibleIds = useMemo(() => new Set(stores.map((s) => s.id)), [stores]);
-  const products = useMemo(() => allProducts.filter((p) => visibleIds.has(p.storeId)), [allProducts, visibleIds]);
+  const products = useMemo(() => allProducts.filter((p) => p.active !== false && visibleIds.has(p.storeId)), [allProducts, visibleIds]);
   const storeById = useMemo(() => Object.fromEntries(stores.map((s) => [s.id, s])), [stores]);
 
   const filtered = useMemo(() => {

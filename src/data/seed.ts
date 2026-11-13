@@ -21,6 +21,7 @@ export type Store = {
 
 export type Product = {
   id: string;
+  active?: boolean;
   name: string;
   image: string;
   price: number;

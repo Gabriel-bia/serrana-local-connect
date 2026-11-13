@@ -116,7 +116,7 @@ function Index() {
 
   const stores = allStores.filter((s) => !s.blocked);
   const visibleStoreIds = new Set(stores.map((s) => s.id));
-  const products = allProducts.filter((p) => visibleStoreIds.has(p.storeId));
+  const products = allProducts.filter((p) => p.active !== false && visibleStoreIds.has(p.storeId));
   const { featured, common } = useMemo(() => partitionProducts(products, seed), [products, seed]);
   const providers = useMemo(() => allProviders.filter((p) => !p.blocked), [allProviders]);
   const storeById = useMemo(

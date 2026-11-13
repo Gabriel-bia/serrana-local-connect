@@ -239,6 +239,7 @@ export type Database = {
       }
       products: {
         Row: {
+          active: boolean
           category_id: string | null
           created_at: string
           description: string
@@ -255,6 +256,7 @@ export type Database = {
           whatsapp: string
         }
         Insert: {
+          active?: boolean
           category_id?: string | null
           created_at?: string
           description?: string
@@ -271,6 +273,7 @@ export type Database = {
           whatsapp?: string
         }
         Update: {
+          active?: boolean
           category_id?: string | null
           created_at?: string
           description?: string

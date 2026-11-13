@@ -1,3 +1,6 @@
+import { AdminSearchBar } from "@/components/AdminSearchBar";
+import { Button } from "@/components/ui/button";
+import { matchesAdminSearch, type AdminFilters } from "@/lib/admin-search";
 import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Outlet, useMatches, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
@@ -50,6 +53,7 @@ export function AdminDashboardContent() {
   const [tab, setTab] = useState<Tab>("produtos");
   const data = useData();
   const logout = useAdminLogout("/admin");
+  useEffect(() => { void dataApi.reload(); }, []);
 
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: "produtos", label: "Produtos", count: data.products.length },
@@ -323,7 +327,9 @@ function ImageUploadField({
 /* ---------------- Products ---------------- */
 
 function ProductsAdmin() {
-  const { products, stores, categories } = useData();
+  const { products, stores, categories, storeCategories } = useData();
+  const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const filtered = products.filter((p) => matchesAdminSearch([p.id, p.name, categories.find((c) => c.id === p.categoryId)?.name, storeCategories.find((c) => c.id === p.storeCategoryId)?.name], filters, [p.categoryId], p.active !== false));
   const [editing, setEditing] = useState<Product | null>(null);
   const blank: Product = {
     id: "",
@@ -342,18 +348,22 @@ function ProductsAdmin() {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} categories={categories} status />
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
-            <tr><th className="p-3">Produto</th><th className="p-3">Loja</th><th className="p-3">Preço</th><th className="p-3">Destaque</th><th className="p-3"></th></tr>
+            <tr><th className="p-3">Produto</th><th className="p-3">Loja</th><th className="p-3">Preço</th><th className="p-3">Destaque</th><th className="p-3">Status</th><th className="p-3"></th></tr>
           </thead>
           <tbody>
-            {products.map((p) => (
+            {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
+            {filtered.map((p) => (
               <tr key={p.id} className="border-t border-border">
-                <td className="p-3"><div className="flex items-center gap-2"><img src={p.image} className="h-10 w-10 rounded object-cover" alt="" /><span>{p.name}</span></div></td>
+                <td className="p-3"><div className="flex items-center gap-2"><img src={p.image} className="h-10 w-10 rounded object-cover" alt="" /><div><span>{p.name}</span><div className="text-xs text-muted-foreground">Código: {p.id}</div></div></div></td>
                 <td className="p-3 text-muted-foreground">{stores.find((s) => s.id === p.storeId)?.name}</td>
                 <td className="p-3 font-semibold">{formatPrice(p.price)}</td>
                 <td className="p-3">{p.featured ? "Sim" : "Não"}</td>
-                <td className="p-3 text-right">
+                <td className="p-3">{p.active !== false ? "Ativo" : "Inativo"}</td>
+                <td className="p-3 text-right whitespace-nowrap">
+                  <Button variant="ghost" size="icon" title={p.active !== false ? "Desativar produto" : "Ativar produto"} aria-label={p.active !== false ? "Desativar produto" : "Ativar produto"} onClick={async () => { try { await dataApi.upsert("products", { ...p, active: p.active === false }); } catch { /* dataApi reports errors */ } }}>{p.active !== false ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}</Button>
                   <button onClick={() => setEditing(p)} className="mr-2 inline-flex items-center gap-1 text-primary hover:underline"><Pencil className="h-4 w-4" /></button>
                   <button onClick={() => confirm("Excluir produto?") && dataApi.remove("products", p.id)} className="inline-flex items-center gap-1 text-destructive hover:underline"><Trash2 className="h-4 w-4" /></button>
                 </td>
@@ -411,6 +421,7 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
         <Field label="Preço (R$)"><input type="number" step="0.01" className={inputClass} value={p.price} onChange={(e) => setP({ ...p, price: Number(e.target.value) })} required /></Field>
         <Field label="Preço original — DE (opcional)"><input type="number" step="0.01" placeholder="0,00" className={inputClass} value={p.originalPrice ?? ""} onChange={(e) => setP({ ...p, originalPrice: e.target.value === "" ? undefined : Number(e.target.value) })} /></Field>
       </div>
+      <Field label="Status"><select className={inputClass} value={p.active === false ? "0" : "1"} onChange={(e) => setP({ ...p, active: e.target.value === "1" })}><option value="1">Ativo (visível)</option><option value="0">Inativo (oculto)</option></select></Field>
       <Field label="Destaque"><select className={inputClass} value={p.featured ? "1" : "0"} onChange={(e) => setP({ ...p, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
       <Field label="Descrição"><textarea className={inputClass} rows={3} value={p.description} onChange={(e) => setP({ ...p, description: e.target.value })} /></Field>
       <div className="grid grid-cols-2 gap-3">
@@ -446,18 +457,22 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
 
 function StoresAdmin() {
   const { stores, categories } = useData();
+  const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const filtered = stores.filter((s) => matchesAdminSearch([s.name, s.whatsapp, s.address], filters, [s.categoryId], !s.blocked));
   const [editing, setEditing] = useState<Store | null>(null);
   const blank: Store = { id: "", name: "", logo: "", banner: "", description: "", categoryId: categories[0]?.id ?? "", whatsapp: "", instagram: "", address: "", featured: false, blocked: false };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} categories={categories} status />
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
             <tr><th className="p-3">Loja</th><th className="p-3 hidden sm:table-cell">Categoria</th><th className="p-3">Status</th><th className="p-3"></th></tr>
           </thead>
           <tbody>
-            {stores.map((s) => (
+            {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
+            {filtered.map((s) => (
               <tr key={s.id} className="border-t border-border">
                 <td className="p-3">
                   <div className="flex items-center gap-2">
@@ -636,23 +651,27 @@ function StoreForm({ initial, onSave, onCancel }: { initial: Store; onSave: (s: 
 
 function CategoriesAdmin() {
   const { categories } = useData();
+  const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const filtered = categories.filter((c) => matchesAdminSearch([c.name, c.slug, c.id], filters, [c.id], undefined));
   const [editing, setEditing] = useState<Category | null>(null);
   const blank: Category = { id: "", slug: "", name: "", icon: "Tag" };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
+        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} categories={categories} />
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Nome</th><th className="p-3">Slug</th><th className="p-3">Ícone</th><th></th></tr></thead>
           <tbody>
-            {categories.map((c) => (
+            {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
+            {filtered.map((c) => (
               <tr key={c.id} className="border-t border-border">
                 <td className="p-3 font-medium">{c.name}</td>
                 <td className="p-3 text-muted-foreground">{c.slug}</td>
                 <td className="p-3 text-muted-foreground">{c.icon}</td>
                 <td className="p-3 text-right">
                   <button onClick={() => setEditing(c)} className="mr-2 text-primary"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => confirm("Excluir categoria?") && dataApi.remove("categories", c.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => { const all = dataApi.get(); if (all.products.some((p) => p.categoryId === c.id) || all.stores.some((s) => s.categoryId === c.id)) { alert("Esta categoria possui cadastros vinculados e não pode ser excluída."); return; } if (confirm("Excluir categoria?")) void dataApi.remove("categories", c.id); }} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
                 </td>
               </tr>
             ))}
@@ -686,23 +705,27 @@ function CategoriesAdmin() {
 
 function ServiceCategoriesAdmin() {
   const { serviceCategories } = useData();
+  const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const filtered = serviceCategories.filter((c) => matchesAdminSearch([c.name, c.slug, c.id], filters, [c.id], undefined));
   const [editing, setEditing] = useState<ServiceCategory | null>(null);
   const blank: ServiceCategory = { id: "", slug: "", name: "", icon: "Wrench" };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
+        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} categories={serviceCategories} />
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Nome</th><th className="p-3">Slug</th><th className="p-3">Ícone</th><th></th></tr></thead>
           <tbody>
-            {serviceCategories.map((c) => (
+            {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
+            {filtered.map((c) => (
               <tr key={c.id} className="border-t border-border">
                 <td className="p-3 font-medium">{c.name}</td>
                 <td className="p-3 text-muted-foreground">{c.slug}</td>
                 <td className="p-3 text-muted-foreground">{c.icon}</td>
                 <td className="p-3 text-right">
                   <button onClick={() => setEditing(c)} className="mr-2 text-primary"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => confirm("Excluir categoria?") && dataApi.remove("serviceCategories", c.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => { const all = dataApi.get(); if (all.providers.some((p) => p.categoryIds.includes(c.id)) || all.providerServices.some((s) => s.categoryId === c.id)) { alert("Esta categoria possui cadastros vinculados e não pode ser excluída."); return; } if (confirm("Excluir categoria?")) void dataApi.remove("serviceCategories", c.id); }} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
                 </td>
               </tr>
             ))}
@@ -735,16 +758,20 @@ function ServiceCategoriesAdmin() {
 
 function ServicesAdmin() {
   const { services, stores } = useData();
+  const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const filtered = services.filter((sv) => matchesAdminSearch([sv.name, sv.description, stores.find((s) => s.id === sv.storeId)?.name], filters, [], undefined));
   const [editing, setEditing] = useState<Service | null>(null);
   const blank: Service = { id: "", name: "", image: "", description: "", storeId: stores[0]?.id ?? "", whatsapp: stores[0]?.whatsapp ?? "", featured: false };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
+        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} />
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Serviço</th><th className="p-3">Loja</th><th className="p-3">Destaque</th><th></th></tr></thead>
           <tbody>
-            {services.map((sv) => (
+            {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
+            {filtered.map((sv) => (
               <tr key={sv.id} className="border-t border-border">
                 <td className="p-3 font-medium">{sv.name}</td>
                 <td className="p-3 text-muted-foreground">{stores.find((s) => s.id === sv.storeId)?.name}</td>
@@ -796,16 +823,20 @@ function ServicesAdmin() {
 
 function BannersAdmin() {
   const { banners } = useData();
+  const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const filtered = banners.filter((b) => matchesAdminSearch([b.title, b.subtitle], filters, [], undefined));
   const [editing, setEditing] = useState<Banner | null>(null);
   const blank: Banner = { id: "", title: "", subtitle: "", image: "", link: "" };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
+        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} />
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Título</th><th className="p-3">Subtítulo</th><th></th></tr></thead>
           <tbody>
-            {banners.map((b) => (
+            {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
+            {filtered.map((b) => (
               <tr key={b.id} className="border-t border-border">
                 <td className="p-3 font-medium">{b.title}</td>
                 <td className="p-3 text-muted-foreground">{b.subtitle}</td>
@@ -845,7 +876,9 @@ function BannersAdmin() {
 /* ---------------- Providers (Prestadores) ---------------- */
 
 function ProvidersAdmin() {
-  const { providers, serviceCategories } = useData();
+  const { providers, serviceCategories, providerServices } = useData();
+  const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const filtered = providers.filter((p) => matchesAdminSearch([p.name, p.description, p.phone, p.whatsapp, p.city, p.serviceArea, ...p.categoryIds.map((id) => serviceCategories.find((c) => c.id === id)?.name), ...providerServices.filter((s) => s.providerId === p.id).map((s) => s.name)], filters, p.categoryIds, !p.blocked));
   const [editing, setEditing] = useState<Provider | null>(null);
   const [managing, setManaging] = useState<Provider | null>(null);
   const blank: Provider = {
@@ -873,6 +906,7 @@ function ProvidersAdmin() {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} categories={serviceCategories} status />
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
             <tr>
@@ -883,7 +917,8 @@ function ProvidersAdmin() {
             </tr>
           </thead>
           <tbody>
-            {providers.map((p) => (
+            {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
+            {filtered.map((p) => (
               <tr key={p.id} className="border-t border-border">
                 <td className="p-3">
                   <div className="flex items-center gap-2">
@@ -917,6 +952,8 @@ function ProvidersAdmin() {
                     Serviços/Trabalhos
                   </button>
                   <button
+                    title={p.blocked ? "Ativar prestador" : "Desativar prestador"}
+                    aria-label={p.blocked ? "Ativar prestador" : "Desativar prestador"}
                     onClick={() => dataApi.upsert("providers", { ...p, blocked: !p.blocked })}
                     className="mr-2 inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium hover:bg-muted"
                   >
@@ -1053,8 +1090,10 @@ function ProviderForm({ initial, onSave, onCancel }: { initial: Provider; onSave
 
 function ProviderManage({ provider, onBack }: { provider: Provider; onBack: () => void }) {
   const { providerServices, providerWorks, serviceCategories } = useData();
-  const myServices = providerServices.filter((s) => s.providerId === provider.id);
-  const myWorks = providerWorks.filter((w) => w.providerId === provider.id);
+  const [serviceFilters, setServiceFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const [workFilters, setWorkFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const myServices = providerServices.filter((s) => s.providerId === provider.id && matchesAdminSearch([s.name, s.description], serviceFilters, [s.categoryId], s.active));
+  const myWorks = providerWorks.filter((w) => w.providerId === provider.id && matchesAdminSearch([w.title, w.description, w.date], workFilters));
 
   const [editingService, setEditingService] = useState<ProviderService | null>(null);
   const [editingWork, setEditingWork] = useState<ProviderWork | null>(null);
@@ -1104,6 +1143,7 @@ function ProviderManage({ provider, onBack }: { provider: Provider; onBack: () =
               <Plus className="h-4 w-4" /> Novo serviço
             </button>
           </div>
+          <AdminSearchBar value={serviceFilters} onChange={setServiceFilters} count={myServices.length} categories={serviceCategories} status />
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
               <tr><th className="p-3">Serviço</th><th className="p-3">Valor</th><th className="p-3">Status</th><th></th></tr>
@@ -1178,6 +1218,7 @@ function ProviderManage({ provider, onBack }: { provider: Provider; onBack: () =
               <Plus className="h-4 w-4" /> Novo trabalho
             </button>
           </div>
+          <AdminSearchBar value={workFilters} onChange={setWorkFilters} count={myWorks.length} />
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
               <tr><th className="p-3">Trabalho</th><th className="p-3">Data</th><th></th></tr>

@@ -127,6 +127,7 @@ export const loadPriorityCatalog = createServerFn({ method: "GET" }).handler(
       })),
       products: rows(products).map((x): Product => ({
         id: String(x.id ?? ""),
+        active: x.active !== false,
         name: String(x.name ?? ""),
         image: String(x.image ?? ""),
         price: Number(x.price ?? 0),

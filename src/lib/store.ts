@@ -129,6 +129,7 @@ const map = {
     table: "products",
     fromRow: (r: Row): Product => ({
       id: r.id as string,
+      active: r.active !== false,
       name: (r.name as string) ?? "",
       image: (r.image as string) ?? "",
       price: Number(r.price ?? 0),
@@ -144,6 +145,7 @@ const map = {
     }),
     toRow: (p: Product): Row => ({
       id: p.id,
+      active: p.active !== false,
       name: p.name,
       image: p.image ?? "",
       price: Number(p.price ?? 0),

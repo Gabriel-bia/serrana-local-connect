@@ -47,7 +47,7 @@ function ProdutosPage() {
     const min = Number(search.min) || 0;
     const max = Number(search.max) || 0;
     const filtered = allProducts.filter((p) => {
-      if (!visibleIds.has(p.storeId)) return false;
+      if (p.active === false || !visibleIds.has(p.storeId)) return false;
       if (search.cat && p.categoryId !== search.cat) return false;
       if (search.loja && p.storeId !== search.loja) return false;
       if (min > 0 && p.price < min) return false;

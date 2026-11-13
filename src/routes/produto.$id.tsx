@@ -26,7 +26,7 @@ function ProdutoPage() {
   const { products, stores, categories } = useData();
   if (!ready) return <div className="min-h-screen grid place-items-center">Carregando produto…</div>;
   const product = products.find((p) => p.id === id);
-  if (!product) throw notFound();
+  if (!product || product.active === false) throw notFound();
   const store = stores.find((s) => s.id === product.storeId);
   if (!store || store.blocked) throw notFound();
   const category = categories.find((c) => c.id === product.categoryId);
