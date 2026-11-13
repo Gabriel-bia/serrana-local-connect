@@ -1,9 +1,9 @@
 # Roadmap
 
-- [ ] Retorno inteligente e compartilhamento público das lojas e prestadores
-- [ ] Linha exclusiva de destaques e ordem aleatória estável durante a navegação
-- [ ] Seleção múltipla por toque prolongado e compartilhamento dos produtos da loja
-- [ ] Validar regras, links diretos, navegação e seleção no computador e celular
+- [x] Retorno inteligente e compartilhamento público das lojas e prestadores
+- [x] Linha exclusiva de destaques e ordem aleatória estável durante a navegação
+- [x] Seleção múltipla por toque prolongado e compartilhamento dos produtos da loja
+- [x] Validar regras, links diretos, navegação e seleção no computador e celular (simulado), como visitante e com sessão conectada
 
 - [x] Diagnóstico do atraso inicial (dados carregavam só no navegador, depois da abertura da página)
 - [x] Investigação do agente (causa: carregamento exclusivamente no navegador)
