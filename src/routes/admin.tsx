@@ -123,7 +123,7 @@ export function AdminDashboardContent() {
           ))}
         </div>
 
-        <div className="mt-6">
+        <div className="admin-content mt-6">
           {tab === "produtos" && <ProductsAdmin />}
           {tab === "lojas" && <StoresAdmin />}
           {tab === "prestadores" && <ProvidersAdmin />}

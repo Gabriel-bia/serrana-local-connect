@@ -2,6 +2,7 @@
 
 - Administrative search filters the existing database-backed live catalog with shared accent-insensitive matching; reload on administrative entry to include admin-only inactive rows.
 - Product activation is persisted independently of featured status; public views exclude inactive products and existing admin RLS retains read/edit access.
+- Scope administrative scrolling to the dashboard content wrapper so listings and editors have viewport-bounded vertical scroll without changing public pages.
 
 - Keep public navigation and product ordering in a root-mounted discovery provider; one browser document defines an ordering session and a full reload creates a new seed without SSR randomness.
 - Reuse public sharing helpers for stores and providers; always share the canonical published origin, never the preview origin.
