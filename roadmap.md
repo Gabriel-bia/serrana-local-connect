@@ -1,7 +1,7 @@
 # Roadmap
 
-- [ ] Add administrative search, category/status filters and clear controls to existing listings.
-- [ ] Persist product activation, preserve category relationships, and validate administrative flows on desktop/mobile.
+- [x] Add administrative search, category/status filters and clear controls to existing listings.
+- [x] Persist product activation, preserve category relationships, and validate administrative flows on desktop/mobile.
 
 - [x] Retorno inteligente e compartilhamento público das lojas e prestadores
 - [x] Linha exclusiva de destaques e ordem aleatória estável durante a navegação

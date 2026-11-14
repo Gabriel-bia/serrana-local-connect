@@ -39,7 +39,7 @@ function LojaPage() {
   const store = stores.find((s) => s.id === id);
   if (!store || store.blocked) throw notFound();
 
-  const list = orderProducts(products.filter((p) => p.storeId === store.id), seed);
+  const list = orderProducts(products.filter((p) => p.active !== false && p.storeId === store.id), seed);
   const selectedProducts = list.filter((p) => selected.has(p.id));
   const selection = { active: selecting, ids: selected, toggle: (productId: string) => {
     setSelecting(true);

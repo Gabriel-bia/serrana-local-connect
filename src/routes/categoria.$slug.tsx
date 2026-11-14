@@ -28,7 +28,7 @@ function CategoriaPage() {
   if (!category) throw notFound();
   const visibleStores = stores.filter((s) => !s.blocked);
   const visibleIds = new Set(visibleStores.map((s) => s.id));
-  const list = products.filter((p) => p.categoryId === category.id && visibleIds.has(p.storeId));
+  const list = products.filter((p) => p.active !== false && p.categoryId === category.id && visibleIds.has(p.storeId));
   const storeById = Object.fromEntries(visibleStores.map((s) => [s.id, s]));
 
   return (
