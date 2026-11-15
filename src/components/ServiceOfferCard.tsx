@@ -38,7 +38,7 @@ export function ServiceOfferCard({
         {service.price != null && service.price > 0 ? (
           <p className="mt-2 text-lg font-extrabold text-primary">{formatPrice(service.price)}</p>
         ) : (
-          <p className="mt-2 text-sm font-semibold text-muted-foreground">Sob consulta</p>
+          <p className="mt-2 text-sm font-semibold text-muted-foreground">A combinar</p>
         )}
         {service.duration && (
           <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">

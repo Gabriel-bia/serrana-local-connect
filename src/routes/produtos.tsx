@@ -50,8 +50,8 @@ function ProdutosPage() {
       if (p.active === false || !visibleIds.has(p.storeId)) return false;
       if (search.cat && p.categoryId !== search.cat) return false;
       if (search.loja && p.storeId !== search.loja) return false;
-      if (min > 0 && p.price < min) return false;
-      if (max > 0 && p.price > max) return false;
+      if (min > 0 && (p.price < min || p.price <= 0)) return false;
+      if (max > 0 && (p.price > max || p.price <= 0)) return false;
       if (search.promo === "1") {
         if (!(p.originalPrice != null && p.originalPrice > p.price)) return false;
       }
@@ -68,10 +68,10 @@ function ProdutosPage() {
     const sorted = [...filtered];
     switch (search.ord) {
       case "preco-asc":
-        sorted.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => (a.price > 0 ? a.price : Infinity) - (b.price > 0 ? b.price : Infinity));
         break;
       case "preco-desc":
-        sorted.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => (b.price > 0 ? b.price : -1) - (a.price > 0 ? a.price : -1));
         break;
       case "nome":
         sorted.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));

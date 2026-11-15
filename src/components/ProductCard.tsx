@@ -20,7 +20,7 @@ export function ProductCard({ product, store, selection }: { product: Product; s
   const waLink = product.whatsapp || store?.whatsapp;
   const originalPrice = product.originalPrice;
   const hasPromo =
-    originalPrice != null && originalPrice > 0 && originalPrice > product.price;
+    product.price > 0 && originalPrice != null && originalPrice > 0 && originalPrice > product.price;
   const discount = hasPromo
     ? Math.round(((originalPrice - product.price) / originalPrice) * 100)
     : 0;
@@ -75,7 +75,11 @@ export function ProductCard({ product, store, selection }: { product: Product; s
       <div className="p-3">
         <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-foreground">{product.name}</h3>
         <div className="mt-2 flex items-baseline gap-2">
-          <p className="text-lg font-extrabold text-primary">{formatPrice(product.price)}</p>
+          {product.price > 0 ? (
+            <p className="text-lg font-extrabold text-primary">{formatPrice(product.price)}</p>
+          ) : (
+            <p className="text-sm font-semibold text-muted-foreground">A combinar</p>
+          )}
           {hasPromo && (
               <p className="text-xs text-muted-foreground line-through">{formatPrice(originalPrice)}</p>
           )}

@@ -39,7 +39,7 @@ export function toggleProduct(ids: Set<string>, id: string) {
 
 export function selectedProductsMessage(store: { id: string; name: string }, products: { storeId: string; name: string; price: number }[]) {
   const items = products.filter((p) => p.storeId === store.id).map((p) => {
-    const price = Number.isFinite(p.price) ? ` — ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.price)}` : "";
+    const price = Number.isFinite(p.price) && p.price > 0 ? ` — ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.price)}` : " — valor a combinar";
     return `• ${p.name}${price}`;
   });
   return `Confira estes produtos que encontrei na loja ${store.name}!\n\n${items.join("\n")}\n\nVeja todos os detalhes diretamente na loja:\n${publicProfileUrl("loja", store.id)}`;

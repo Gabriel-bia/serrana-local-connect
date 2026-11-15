@@ -359,7 +359,7 @@ function ProductsAdmin() {
               <tr key={p.id} className="border-t border-border">
                 <td className="p-3"><div className="flex items-center gap-2"><img src={p.image} className="h-10 w-10 rounded object-cover" alt="" /><div><span>{p.name}</span><div className="text-xs text-muted-foreground">Código: {p.id}</div></div></div></td>
                 <td className="p-3 text-muted-foreground">{stores.find((s) => s.id === p.storeId)?.name}</td>
-                <td className="p-3 font-semibold">{formatPrice(p.price)}</td>
+                <td className="p-3 font-semibold">{p.price > 0 ? formatPrice(p.price) : "A combinar"}</td>
                 <td className="p-3">{p.featured ? "Sim" : "Não"}</td>
                 <td className="p-3">{p.active !== false ? "Ativo" : "Inativo"}</td>
                 <td className="p-3 text-right whitespace-nowrap">
@@ -393,6 +393,7 @@ function ProductsAdmin() {
 function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: (p: Product) => void; onCancel: () => void }) {
   const { stores, categories, storeCategories } = useData();
   const [p, setP] = useState<Product>(initial);
+  const [aCombinar, setACombinar] = useState(!(initial.price > 0));
   const storeCats = storeCategories
     .filter((sc) => sc.storeId === p.storeId)
     .sort((a, b) => a.position - b.position);
@@ -410,7 +411,7 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
           alert("Informe um Link do WhatsApp válido (https://wa.me/... ou https://api.whatsapp.com/...).");
           return;
         }
-        onSave({ ...p, whatsapp: p.whatsapp.trim() });
+        onSave({ ...p, whatsapp: p.whatsapp.trim(), price: aCombinar ? 0 : p.price, originalPrice: aCombinar ? undefined : p.originalPrice });
       }}
       className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit sticky top-20"
     >
@@ -418,9 +419,13 @@ function ProductForm({ initial, onSave, onCancel }: { initial: Product; onSave: 
       <Field label="Nome"><input className={inputClass} value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} required /></Field>
       <ImageUploadField label="Foto do produto" value={p.image} onChange={(v) => setP({ ...p, image: v })} required />
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Preço (R$)"><input type="number" step="0.01" className={inputClass} value={p.price} onChange={(e) => setP({ ...p, price: Number(e.target.value) })} required /></Field>
-        <Field label="Preço original — DE (opcional)"><input type="number" step="0.01" placeholder="0,00" className={inputClass} value={p.originalPrice ?? ""} onChange={(e) => setP({ ...p, originalPrice: e.target.value === "" ? undefined : Number(e.target.value) })} /></Field>
+        <Field label="Preço (R$)"><input type="number" step="0.01" className={inputClass} value={p.price > 0 ? p.price : ""} onChange={(e) => setP({ ...p, price: Number(e.target.value) })} required={!aCombinar} disabled={aCombinar} placeholder="A combinar" /></Field>
+        <Field label="Preço original — DE (opcional)"><input type="number" step="0.01" placeholder="0,00" className={inputClass} value={p.originalPrice ?? ""} onChange={(e) => setP({ ...p, originalPrice: e.target.value === "" ? undefined : Number(e.target.value) })} disabled={aCombinar} /></Field>
       </div>
+      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+        <input type="checkbox" className="h-4 w-4 accent-[hsl(var(--primary))]" checked={aCombinar} onChange={(e) => setACombinar(e.target.checked)} />
+        Valor a combinar (o cliente pergunta o preço pelo WhatsApp)
+      </label>
       <Field label="Status"><select className={inputClass} value={p.active === false ? "0" : "1"} onChange={(e) => setP({ ...p, active: e.target.value === "1" })}><option value="1">Ativo (visível)</option><option value="0">Inativo (oculto)</option></select></Field>
       <Field label="Destaque"><select className={inputClass} value={p.featured ? "1" : "0"} onChange={(e) => setP({ ...p, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
       <Field label="Descrição"><textarea className={inputClass} rows={3} value={p.description} onChange={(e) => setP({ ...p, description: e.target.value })} /></Field>
@@ -1161,7 +1166,7 @@ function ProviderManage({ provider, onBack }: { provider: Provider; onBack: () =
                       </div>
                     </div>
                   </td>
-                  <td className="p-3 font-semibold">{s.price != null && s.price > 0 ? formatPrice(s.price) : "—"}</td>
+                  <td className="p-3 font-semibold">{s.price != null && s.price > 0 ? formatPrice(s.price) : "A combinar"}</td>
                   <td className="p-3 text-xs">
                     {s.active ? <span className="text-emerald-600">Ativo</span> : <span className="text-muted-foreground">Inativo</span>}
                     {s.featured && <span className="ml-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-primary">Destaque</span>}
@@ -1192,10 +1197,14 @@ function ProviderManage({ provider, onBack }: { provider: Provider; onBack: () =
             <ImageUploadField label="Imagem ilustrativa" value={editingService.image} onChange={(v) => setEditingService({ ...editingService, image: v })} required />
             <div className="grid grid-cols-2 gap-3">
               <Field label="Valor (R$) — opcional">
-                <input type="number" step="0.01" className={inputClass} value={editingService.price ?? ""} onChange={(e) => setEditingService({ ...editingService, price: e.target.value === "" ? undefined : Number(e.target.value) })} />
+                <input type="number" step="0.01" className={inputClass} value={editingService.price ?? ""} onChange={(e) => setEditingService({ ...editingService, price: e.target.value === "" ? undefined : Number(e.target.value) })} disabled={editingService.price == null} placeholder="A combinar" />
               </Field>
               <Field label="Tempo estimado"><input className={inputClass} value={editingService.duration ?? ""} onChange={(e) => setEditingService({ ...editingService, duration: e.target.value })} placeholder="Ex.: 40 min" /></Field>
             </div>
+            <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+              <input type="checkbox" className="h-4 w-4 accent-[hsl(var(--primary))]" checked={editingService.price == null} onChange={(e) => setEditingService({ ...editingService, price: e.target.checked ? undefined : 0 })} />
+              Valor a combinar (o cliente pergunta o preço pelo WhatsApp)
+            </label>
             <Field label="Categoria"><select className={inputClass} value={editingService.categoryId} onChange={(e) => setEditingService({ ...editingService, categoryId: e.target.value })}>{serviceCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Status"><select className={inputClass} value={editingService.active ? "1" : "0"} onChange={(e) => setEditingService({ ...editingService, active: e.target.value === "1" })}><option value="1">Ativo</option><option value="0">Inativo</option></select></Field>

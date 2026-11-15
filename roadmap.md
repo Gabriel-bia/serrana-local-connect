@@ -16,3 +16,5 @@
 - [x] Tela de carregamento com logo SE e mensagem "Personalizando os melhores produtos para você"
 - [x] Typecheck sem erros
 - [x] Validar a página inicial no navegador (sem erros; produtos e prestadores aparecem)
+
+- [x] Opção "valor a combinar" nos preços de produtos e serviços no admin, com exibição "A combinar" no site

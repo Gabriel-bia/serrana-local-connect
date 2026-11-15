@@ -52,7 +52,11 @@ function ProdutoPage() {
                 <StoreIcon className="h-4 w-4" /> {store.name}
               </Link>
             )}
-            <p className="mt-4 text-4xl font-extrabold text-primary">{formatPrice(product.price)}</p>
+            {product.price > 0 ? (
+              <p className="mt-4 text-4xl font-extrabold text-primary">{formatPrice(product.price)}</p>
+            ) : (
+              <p className="mt-4 text-2xl font-bold text-muted-foreground">Preço a combinar com a loja</p>
+            )}
             <p className="mt-4 text-foreground/80 leading-relaxed">{product.description}</p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
