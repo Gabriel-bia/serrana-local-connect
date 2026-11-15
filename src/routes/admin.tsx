@@ -9,14 +9,14 @@ import { AdminAuthGate, useAdminLogout } from "@/components/AdminAuthGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { dataApi, useData, formatPrice, isValidWhatsappLink } from "@/lib/store";
-import type { Banner, Category, Product, Service, ServiceCategory, Store, StoreCategory, Provider, ProviderService, ProviderWork } from "@/data/seed";
+import type { Banner, Category, Product, ServiceCategory, Store, StoreCategory, Provider, ProviderService, ProviderWork } from "@/data/seed";
 
 export const Route = createFileRoute("/admin")({
   head: () => pageHead("Admin — Serrana Express", "Acesso à gestão administrativa da Serrana Express."),
   component: AdminPage,
 });
 
-type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners" | "prestadores" | "cat-prestadores";
+type Tab = "produtos" | "lojas" | "categorias" | "banners" | "prestadores" | "cat-prestadores";
 
 function AdminPage() {
   const matches = useMatches();
@@ -61,7 +61,6 @@ export function AdminDashboardContent() {
     { key: "prestadores", label: "Prestadores", count: data.providers.length },
     { key: "categorias", label: "Categorias", count: data.categories.length },
     { key: "cat-prestadores", label: "Categorias de Prestadores", count: data.serviceCategories.length },
-    { key: "servicos", label: "Serviços", count: data.services.length },
     { key: "banners", label: "Banners", count: data.banners.length },
   ];
 
@@ -129,7 +128,6 @@ export function AdminDashboardContent() {
           {tab === "prestadores" && <ProvidersAdmin />}
           {tab === "categorias" && <CategoriesAdmin />}
           {tab === "cat-prestadores" && <ServiceCategoriesAdmin />}
-          {tab === "servicos" && <ServicesAdmin />}
           {tab === "banners" && <BannersAdmin />}
         </div>
       </main>
@@ -760,69 +758,6 @@ function ServiceCategoriesAdmin() {
   );
 }
 
-
-function ServicesAdmin() {
-  const { services, stores } = useData();
-  const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
-  const filtered = services.filter((sv) => matchesAdminSearch([sv.name, sv.description, stores.find((s) => s.id === sv.storeId)?.name], filters, [], undefined));
-  const [editing, setEditing] = useState<Service | null>(null);
-  const blank: Service = { id: "", name: "", image: "", description: "", storeId: stores[0]?.id ?? "", whatsapp: stores[0]?.whatsapp ?? "", featured: false };
-
-  return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="rounded-xl border border-border bg-card overflow-x-auto">
-        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} />
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Serviço</th><th className="p-3">Loja</th><th className="p-3">Destaque</th><th></th></tr></thead>
-          <tbody>
-            {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
-            {filtered.map((sv) => (
-              <tr key={sv.id} className="border-t border-border">
-                <td className="p-3 font-medium">{sv.name}</td>
-                <td className="p-3 text-muted-foreground">{stores.find((s) => s.id === sv.storeId)?.name}</td>
-                <td className="p-3">{sv.featured ? "Sim" : "Não"}</td>
-                <td className="p-3 text-right">
-                  <button onClick={() => setEditing(sv)} className="mr-2 text-primary"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => confirm("Excluir serviço?") && dataApi.remove("services", sv.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="p-3 border-t border-border">
-          <button onClick={() => setEditing(blank)} className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"><Plus className="h-4 w-4" /> Novo serviço</button>
-        </div>
-      </div>
-      {editing && (
-        <form
-          key={editing.id || "new"}
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!isValidWhatsappLink(editing.whatsapp.trim())) {
-              alert("Informe um Link do WhatsApp válido (https://wa.me/... ou https://api.whatsapp.com/...).");
-              return;
-            }
-            dataApi.upsert("services", { ...editing, whatsapp: editing.whatsapp.trim(), id: editing.id || newId() });
-            setEditing(null);
-          }}
-          className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit"
-        >
-          <h3 className="font-semibold">{editing.id ? "Editar serviço" : "Novo serviço"}</h3>
-          <Field label="Nome"><input className={inputClass} value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} required /></Field>
-          <ImageUploadField label="Imagem do serviço" value={editing.image} onChange={(v) => setEditing({ ...editing, image: v })} required />
-          <Field label="Descrição"><textarea className={inputClass} rows={3} value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
-          <Field label="Loja"><select className={inputClass} value={editing.storeId} onChange={(e) => { const st = stores.find((s) => s.id === e.target.value); setEditing({ ...editing, storeId: e.target.value, whatsapp: st?.whatsapp ?? editing.whatsapp }); }}>{stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
-          <WhatsAppLinkField value={editing.whatsapp} onChange={(v) => setEditing({ ...editing, whatsapp: v })} />
-          <Field label="Destaque"><select className={inputClass} value={editing.featured ? "1" : "0"} onChange={(e) => setEditing({ ...editing, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
-            <button type="button" onClick={() => setEditing(null)} className="rounded-lg border border-border px-3 py-2 font-medium">Cancelar</button>
-          </div>
-        </form>
-      )}
-    </div>
-  );
-}
 
 /* ---------------- Banners ---------------- */
 
