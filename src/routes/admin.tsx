@@ -16,7 +16,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "produtos" | "lojas" | "categorias" | "banners" | "prestadores" | "cat-prestadores";
+type Tab = "produtos" | "lojas" | "categorias" | "servicos" | "banners" | "prestadores" | "cat-prestadores";
 
 function AdminPage() {
   const matches = useMatches();
@@ -61,6 +61,7 @@ export function AdminDashboardContent() {
     { key: "prestadores", label: "Prestadores", count: data.providers.length },
     { key: "categorias", label: "Categorias", count: data.categories.length },
     { key: "cat-prestadores", label: "Categorias de Prestadores", count: data.serviceCategories.length },
+    { key: "servicos", label: "Serviços", count: data.providerServices.length },
     { key: "banners", label: "Banners", count: data.banners.length },
   ];
 
@@ -128,6 +129,7 @@ export function AdminDashboardContent() {
           {tab === "prestadores" && <ProvidersAdmin />}
           {tab === "categorias" && <CategoriesAdmin />}
           {tab === "cat-prestadores" && <ServiceCategoriesAdmin />}
+          {tab === "servicos" && <ServicesAdmin />}
           {tab === "banners" && <BannersAdmin />}
         </div>
       </main>
@@ -758,6 +760,124 @@ function ServiceCategoriesAdmin() {
   );
 }
 
+
+/* ---------------- Serviços (cards dos prestadores) ---------------- */
+
+function ServicesAdmin() {
+  const { providerServices, providers, serviceCategories } = useData();
+  const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
+  const filtered = providerServices.filter((sv) =>
+    matchesAdminSearch(
+      [sv.name, sv.description, providers.find((p) => p.id === sv.providerId)?.name],
+      filters,
+      [sv.categoryId],
+      sv.active,
+    ),
+  );
+  const [editing, setEditing] = useState<ProviderService | null>(null);
+  const blank: ProviderService = {
+    id: "",
+    providerId: providers[0]?.id ?? "",
+    name: "",
+    description: "",
+    price: undefined,
+    image: "",
+    categoryId: serviceCategories[0]?.id ?? "",
+    duration: "",
+    active: true,
+    featured: false,
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="rounded-xl border border-border bg-card overflow-x-auto">
+        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} categories={serviceCategories} status />
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+            <tr><th className="p-3">Serviço</th><th className="p-3">Prestador</th><th className="p-3">Valor</th><th className="p-3">Status</th><th></th></tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
+            {filtered.map((sv) => (
+              <tr key={sv.id} className="border-t border-border">
+                <td className="p-3">
+                  <div className="flex items-center gap-2">
+                    <img src={sv.image} className="h-10 w-10 rounded object-cover" alt="" />
+                    <div>
+                      <div className="font-medium">{sv.name}</div>
+                      <div className="text-xs text-muted-foreground">{serviceCategories.find((c) => c.id === sv.categoryId)?.name}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="p-3 text-muted-foreground">{providers.find((p) => p.id === sv.providerId)?.name ?? "—"}</td>
+                <td className="p-3 font-semibold">{sv.price != null && sv.price > 0 ? formatPrice(sv.price) : "A combinar"}</td>
+                <td className="p-3 text-xs">
+                  {sv.active ? <span className="text-emerald-600">Ativo</span> : <span className="text-muted-foreground">Inativo</span>}
+                  {sv.featured && <span className="ml-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-primary">Destaque</span>}
+                </td>
+                <td className="p-3 text-right whitespace-nowrap">
+                  <button onClick={() => setEditing(sv)} className="mr-2 text-primary"><Pencil className="h-4 w-4" /></button>
+                  <button onClick={() => confirm("Excluir serviço?") && dataApi.remove("providerServices", sv.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="p-3 border-t border-border">
+          <button onClick={() => setEditing(blank)} className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"><Plus className="h-4 w-4" /> Novo serviço</button>
+        </div>
+      </div>
+      {editing && (
+        <form
+          key={editing.id || "new"}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!editing.providerId) {
+              alert("Cadastre um prestador antes de adicionar serviços.");
+              return;
+            }
+            dataApi.upsert("providerServices", { ...editing, id: editing.id || newId() });
+            setEditing(null);
+          }}
+          className="rounded-xl border border-border bg-card p-4 space-y-3 h-fit"
+        >
+          <h3 className="font-semibold">{editing.id ? "Editar serviço" : "Novo serviço"}</h3>
+          <Field label="Prestador">
+            <select className={inputClass} value={editing.providerId} onChange={(e) => setEditing({ ...editing, providerId: e.target.value })}>
+              {providers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </Field>
+          <Field label="Nome"><input className={inputClass} value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} required /></Field>
+          <Field label="Descrição"><textarea className={inputClass} rows={3} value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
+          <ImageUploadField label="Imagem ilustrativa" value={editing.image} onChange={(v) => setEditing({ ...editing, image: v })} required />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Valor (R$) — opcional">
+              <input type="number" step="0.01" className={inputClass} value={editing.price ?? ""} onChange={(e) => setEditing({ ...editing, price: e.target.value === "" ? undefined : Number(e.target.value) })} disabled={editing.price == null} placeholder="A combinar" />
+            </Field>
+            <Field label="Tempo estimado"><input className={inputClass} value={editing.duration ?? ""} onChange={(e) => setEditing({ ...editing, duration: e.target.value })} placeholder="Ex.: 40 min" /></Field>
+          </div>
+          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+            <input type="checkbox" className="h-4 w-4 accent-[hsl(var(--primary))]" checked={editing.price == null} onChange={(e) => setEditing({ ...editing, price: e.target.checked ? undefined : 0 })} />
+            Valor a combinar (o cliente pergunta o preço pelo WhatsApp)
+          </label>
+          <Field label="Categoria">
+            <select className={inputClass} value={editing.categoryId} onChange={(e) => setEditing({ ...editing, categoryId: e.target.value })}>
+              {serviceCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Status"><select className={inputClass} value={editing.active ? "1" : "0"} onChange={(e) => setEditing({ ...editing, active: e.target.value === "1" })}><option value="1">Ativo</option><option value="0">Inativo</option></select></Field>
+            <Field label="Destaque"><select className={inputClass} value={editing.featured ? "1" : "0"} onChange={(e) => setEditing({ ...editing, featured: e.target.value === "1" })}><option value="0">Não</option><option value="1">Sim</option></select></Field>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
+            <button type="button" onClick={() => setEditing(null)} className="rounded-lg border border-border px-3 py-2 font-medium">Cancelar</button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
 
 /* ---------------- Banners ---------------- */
 
