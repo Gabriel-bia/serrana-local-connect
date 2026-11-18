@@ -30,7 +30,6 @@ export const Route = createFileRoute("/")({
   pendingMs: 0,
   pendingComponent: LoadingScreen,
   errorComponent: CatalogError,
-  notFoundComponent: LoadingScreen,
   component: Index,
 });
 

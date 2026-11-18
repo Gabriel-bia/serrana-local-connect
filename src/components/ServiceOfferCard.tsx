@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { MessageCircle, Clock } from "lucide-react";
 import type { ProviderService, Provider } from "@/data/seed";
 import { formatPrice, buildWhatsappLink } from "@/lib/store";
@@ -12,7 +13,11 @@ export function ServiceOfferCard({
 }) {
   const waLink = provider?.whatsapp;
   return (
-    <div className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-glow)]">
+    <Link
+      to="/servico/$id"
+      params={{ id: service.id }}
+      className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-glow)]"
+    >
       <div className="relative aspect-square overflow-hidden bg-muted">
         <img
           src={service.image}
@@ -49,9 +54,11 @@ export function ServiceOfferCard({
           <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{service.description}</p>
         )}
         {waLink && provider && (
-          <button
-            type="button"
-            onClick={() => {
+          <span
+            data-product-action
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               logWhatsappClick({ storeId: provider.id, storeName: provider.name });
               window.open(
                 buildWhatsappLink(
@@ -63,11 +70,12 @@ export function ServiceOfferCard({
               );
             }}
             className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-whatsapp)] px-3 py-2 text-xs font-semibold text-[var(--color-whatsapp-foreground)] shadow-sm transition hover:opacity-90"
+            aria-label="Conversar no WhatsApp"
           >
             <MessageCircle className="h-4 w-4" /> WhatsApp
-          </button>
+          </span>
         )}
       </div>
-    </div>
+    </Link>
   );
 }
