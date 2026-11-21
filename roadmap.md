@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Incluir foto no compartilhamento compatível e link da foto no contato direto; validar mensagens, arquivo real de imagem e alternativas no computador e celular simulado (envio final pelo WhatsApp não verificado).
+
 - [x] Incluir nome, valor e link público nos contatos por cards e detalhes; preservar a mensagem cadastrada nos contatos gerais, com testes no computador e celular simulado.
 
 - [x] Add administrative search, category/status filters and clear controls to existing listings.

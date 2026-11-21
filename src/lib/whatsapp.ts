@@ -20,12 +20,21 @@ export function buildWhatsappLink(stored: string, message?: string, replaceMessa
   return url.toString();
 }
 
-export function itemContactMessage(kind: "produto" | "servico", item: { id: string; name: string; price?: number | null; providerId?: string }) {
+export function itemContactMessage(kind: "produto" | "servico", item: { id: string; name: string; price?: number | null; providerId?: string; image?: string }) {
   const price = item.price != null && Number.isFinite(item.price) && item.price > 0
     ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.price)
     : "valor a combinar";
   const url = kind === "produto" ? publicProductUrl(item.id)
     : item.providerId ? publicProfileUrl("prestador", item.providerId)
     : `${PUBLIC_ORIGIN}/servico/${encodeURIComponent(item.id)}`;
-  return `Olá, vim pelo app Serrana Express! Tenho interesse no ${kind === "produto" ? "produto" : "serviço"}:\n\n• ${item.name} — ${price}\n\n${url}`;
+  let photo = "";
+  if (kind === "produto" && item.image) {
+    try {
+      const image = new URL(item.image);
+      if (image.protocol === "https:") photo = `\n\nFoto do produto:\n${image.href}`;
+    } catch {
+      // Only public absolute image links can be opened by the recipient.
+    }
+  }
+  return `Olá, vim pelo app Serrana Express! Tenho interesse no ${kind === "produto" ? "produto" : "serviço"}:\n\n• ${item.name} — ${price}${photo}\n\n${url}`;
 }

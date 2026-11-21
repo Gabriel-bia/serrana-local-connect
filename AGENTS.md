@@ -1,6 +1,7 @@
  # Architecture rules
 
 - Keep WhatsApp URL and item-message logic in a browser-safe helper; item contacts explicitly replace saved text, while general contacts preserve it so registered greetings are not lost.
+- Reuse ShareButton for product photos: native file sharing carries the product link in text, while direct WhatsApp contact and unsupported devices use a public HTTPS photo link because WhatsApp deep links cannot attach files.
 
 - Store WhatsApp changes synchronize linked product contacts in a database trigger under existing RLS; public product actions resolve the store contact first and administrative saves reload products to avoid stale copied links.
 

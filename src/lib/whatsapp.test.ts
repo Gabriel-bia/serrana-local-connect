@@ -24,4 +24,17 @@ describe("WhatsApp contact messages", () => {
   it("general contacts without registered text use their ordinary fallback", () => {
     assert.equal(new URL(buildWhatsappLink("https://wa.me/5535999990001", "Olá, encontrei a loja.")).searchParams.get("text"), "Olá, encontrei a loja.");
   });
+  it("product contact includes the selected photo together with the product link", () => {
+    const image = "https://serranaexpress.com/catalog/camisa.jpg";
+    const message = itemContactMessage("produto", { id: "p-1", name: "Camisa", price: 29.9, image });
+    assert.ok(message.includes(image));
+    assert.ok(message.endsWith("https://serrana-express.lovable.app/produto/p-1"));
+    assert.equal(new URL(buildWhatsappLink(saved, message, true)).searchParams.get("text"), message);
+  });
+  it("does not put embedded or invalid photos into WhatsApp messages", () => {
+    for (const image of ["data:image/png;base64,abc", "/photo.jpg", "javascript:alert(1)"]) {
+      const message = itemContactMessage("produto", { id: "p-1", name: "Camisa", image });
+      assert.ok(!message.includes(image));
+    }
+  });
 });

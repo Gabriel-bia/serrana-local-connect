@@ -39,13 +39,14 @@ export function ShareButton({
   const [copied, setCopied] = useState(false);
   const [manualCopy, setManualCopy] = useState(false);
   const content = text.includes(url) ? text : `${text}\n\n${url}`;
+  const fallbackContent = imageUrl?.startsWith("https://") ? `${content}\n\nFoto do produto:\n${imageUrl}` : content;
   const share = async () => {
     if (typeof navigator.share === "function") {
       try {
         if (imageUrl) {
           const file = await fetchShareFile(imageUrl);
           if (file && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
-            await navigator.share({ title, text, url, files: [file] });
+            await navigator.share({ title, text: content, files: [file] });
             return;
           }
         }
@@ -82,7 +83,7 @@ export function ShareButton({
       <PopoverAnchor asChild>{trigger}</PopoverAnchor>
       <PopoverContent side="top" align="end" collisionPadding={16} className="w-64 max-w-[calc(100vw-2rem)] p-3 shadow-[var(--shadow-card)]">
         <Button asChild variant="ghost" className="w-full justify-start">
-          <a href={`https://wa.me/?text=${encodeURIComponent(content)}`} target="_blank" rel="noopener noreferrer">
+          <a href={`https://wa.me/?text=${encodeURIComponent(fallbackContent)}`} target="_blank" rel="noopener noreferrer">
             <MessageCircle />
             WhatsApp
           </a>
@@ -92,7 +93,7 @@ export function ShareButton({
           className="w-full justify-start"
           onClick={async () => {
             try {
-              await navigator.clipboard.writeText(content);
+              await navigator.clipboard.writeText(fallbackContent);
               setCopied(true);
             } catch {
               setManualCopy(true);
@@ -106,7 +107,7 @@ export function ShareButton({
           <textarea
             readOnly
             aria-label="Texto para compartilhar"
-            value={content}
+            value={fallbackContent}
             onFocus={(e) => e.currentTarget.select()}
             className="mt-2 w-full rounded-md border border-input bg-background p-2 text-xs"
           />

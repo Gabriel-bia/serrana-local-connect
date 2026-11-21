@@ -7,6 +7,8 @@ import { useData, useDataReady, formatPrice } from "@/lib/store";
 import { BackButton } from "@/components/BackButton";
 import { productWhatsapp } from "@/lib/product-contact";
 import { itemContactMessage } from "@/lib/whatsapp";
+import { ShareButton } from "@/components/ShareButton";
+import { productShareMessage, publicProductUrl } from "@/lib/discovery";
 
 export const Route = createFileRoute("/produto/$id")({
   head: ({ params }) => ({ meta: [
@@ -91,6 +93,14 @@ function ProdutoPage() {
                   <ExternalLink className="h-5 w-5" /> Acessar link do produto
                 </a>
               )}
+              <div className="sm:col-span-2">
+                <ShareButton
+                  title={product.name}
+                  text={productShareMessage(product)}
+                  url={publicProductUrl(product.id)}
+                  imageUrl={product.image}
+                />
+              </div>
             </div>
           </div>
         </div>
