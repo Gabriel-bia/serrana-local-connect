@@ -4,6 +4,17 @@ export function publicProfileUrl(kind: "loja" | "prestador", id: string) {
   return `${PUBLIC_ORIGIN}/${kind}/${encodeURIComponent(id)}`;
 }
 
+export function publicProductUrl(id: string) {
+  return `${PUBLIC_ORIGIN}/produto/${encodeURIComponent(id)}`;
+}
+
+export function productShareMessage(product: { id: string; name: string; price: number }) {
+  const price = Number.isFinite(product.price) && product.price > 0
+    ? ` — ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(product.price)}`
+    : " — valor a combinar";
+  return `Confira este produto que encontrei no Serrana Express!\n\n• ${product.name}${price}\n\nVeja todos os detalhes:\n${publicProductUrl(product.id)}`;
+}
+
 function rank(value: string, seed: number) {
   let hash = seed >>> 0;
   for (let i = 0; i < value.length; i++) {

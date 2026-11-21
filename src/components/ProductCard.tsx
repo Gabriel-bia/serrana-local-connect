@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import type { Product, Store } from "@/data/seed";
 import { formatPrice, buildWhatsappLink } from "@/lib/store";
 import { logWhatsappClick } from "@/lib/whatsapp-clicks";
+import { ShareButton } from "@/components/ShareButton";
+import { productShareMessage, publicProductUrl } from "@/lib/discovery";
 
 
 export type ProductSelection = { active: boolean; selected: boolean; toggle: () => void };
@@ -86,7 +88,19 @@ export function ProductCard({ product, store, selection }: { product: Product; s
         </div>
         <div className="mt-2 flex items-center justify-between gap-2">
           {store && <p className="truncate text-xs text-muted-foreground">{store.name}</p>}
-          {waLink && !selection?.active && (
+          {!selection?.active && (
+            <span className="ml-auto flex items-center gap-1.5">
+              <span data-product-action onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                <ShareButton
+                  variant="icon"
+                  label={`Compartilhar ${product.name}`}
+                  title={product.name}
+                  text={productShareMessage(product)}
+                  url={publicProductUrl(product.id)}
+                  imageUrl={product.image}
+                />
+              </span>
+          {waLink && (
             <span
               data-product-action
               onClick={(e) => {
@@ -108,7 +122,8 @@ export function ProductCard({ product, store, selection }: { product: Product; s
               <MessageCircle className="h-4 w-4" />
             </span>
           )}
-
+            </span>
+          )}
         </div>
       </div>
     </Link>

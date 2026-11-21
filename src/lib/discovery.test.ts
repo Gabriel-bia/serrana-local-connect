@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { orderProducts, partitionProducts, publicProfileUrl, selectedProductsMessage, toggleProduct } from "./discovery";
+import { orderProducts, partitionProducts, productShareMessage, publicProductUrl, publicProfileUrl, selectedProductsMessage, toggleProduct } from "./discovery";
 
 const products = Array.from({ length: 24 }, (_, i) => ({ id: `p-${i}`, featured: i < 8, categoryId: `c-${i % 3}` }));
 describe("product discovery rules", () => {
@@ -50,5 +50,19 @@ describe("product discovery rules", () => {
   it("always uses published links for stores and providers", () => {
     assert.equal(publicProfileUrl("loja", "abc"), "https://serrana-express.lovable.app/loja/abc");
     assert.equal(publicProfileUrl("prestador", "xyz"), "https://serrana-express.lovable.app/prestador/xyz");
+  });
+  it("product card share links to the published product page", () => {
+    assert.equal(publicProductUrl("p-1"), "https://serrana-express.lovable.app/produto/p-1");
+  });
+  it("product card share message carries name, price and the product link", () => {
+    const message = productShareMessage({ id: "p-1", name: "Camisa", price: 29.9 });
+    assert.ok(message.includes("Camisa"));
+    assert.ok(message.includes("29,90"));
+    assert.ok(message.endsWith("https://serrana-express.lovable.app/produto/p-1"));
+  });
+  it("product card share message says valor a combinar when there is no price", () => {
+    const message = productShareMessage({ id: "p-2", name: "Artesanato", price: 0 });
+    assert.ok(message.includes("valor a combinar"));
+    assert.ok(!message.includes("R$"));
   });
 });
