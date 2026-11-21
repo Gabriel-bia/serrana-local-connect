@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Incluir nome, valor e link público nos contatos por cards e detalhes; preservar a mensagem cadastrada nos contatos gerais, com testes no computador e celular simulado.
+
 - [x] Add administrative search, category/status filters and clear controls to existing listings.
 - [x] Persist product activation, preserve category relationships, and validate administrative flows on desktop/mobile.
 

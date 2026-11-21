@@ -1,5 +1,7 @@
  # Architecture rules
 
+- Keep WhatsApp URL and item-message logic in a browser-safe helper; item contacts explicitly replace saved text, while general contacts preserve it so registered greetings are not lost.
+
 - Store WhatsApp changes synchronize linked product contacts in a database trigger under existing RLS; public product actions resolve the store contact first and administrative saves reload products to avoid stale copied links.
 
 - Administrative search filters the existing database-backed live catalog with shared accent-insensitive matching; reload on administrative entry to include admin-only inactive rows.

@@ -3,6 +3,7 @@ import { MessageCircle, Clock } from "lucide-react";
 import type { ProviderService, Provider } from "@/data/seed";
 import { formatPrice, buildWhatsappLink } from "@/lib/store";
 import { logWhatsappClick } from "@/lib/whatsapp-clicks";
+import { itemContactMessage } from "@/lib/whatsapp";
 
 export function ServiceOfferCard({
   service,
@@ -63,7 +64,8 @@ export function ServiceOfferCard({
               window.open(
                 buildWhatsappLink(
                   waLink,
-                  `Olá, vim pelo app Serrana Express! Tenho interesse no serviço "${service.name}".`,
+                  itemContactMessage("servico", service),
+                  true,
                 ),
                 "_blank",
                 "noopener,noreferrer",

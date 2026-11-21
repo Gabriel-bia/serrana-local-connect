@@ -7,6 +7,7 @@ import { BackButton } from "@/components/BackButton";
 import { ShareButton } from "@/components/ShareButton";
 import { useData, useDataReady, formatPrice } from "@/lib/store";
 import { PUBLIC_ORIGIN } from "@/lib/discovery";
+import { itemContactMessage } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/servico/$id")({
   head: ({ params }) => ({ meta: [
@@ -72,7 +73,8 @@ function ServicoPage() {
                 link={provider.whatsapp}
                 storeId={provider.id}
                 storeName={provider.name}
-                message={`Olá, vim pelo app Serrana Express! Tenho interesse no serviço "${service.name}".`}
+                message={itemContactMessage("servico", service)}
+                replaceMessage
                 label="Falar com o prestador"
                 className="w-full"
               />

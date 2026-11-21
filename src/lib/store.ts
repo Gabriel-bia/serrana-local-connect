@@ -503,32 +503,7 @@ export const dataApi = {
   },
 };
 
-/** Mantém compat: gera link válido a partir do número salvo. */
-export function isValidWhatsappLink(value: string): boolean {
-  if (!value) return false;
-  const v = value.trim();
-  return v.startsWith("https://wa.me/") || v.startsWith("https://api.whatsapp.com/");
-}
-
-export function buildWhatsappLink(stored: string, message?: string): string {
-  if (!stored) return "#";
-  const raw = stored.trim();
-  let url: URL;
-  try {
-    if (isValidWhatsappLink(raw)) {
-      url = new URL(raw);
-    } else {
-      const digits = raw.replace(/\D/g, "");
-      url = new URL(`https://wa.me/${digits}`);
-    }
-  } catch {
-    return raw;
-  }
-  if (message && !url.searchParams.has("text")) {
-    url.searchParams.set("text", message);
-  }
-  return url.toString();
-}
+export { isValidWhatsappLink, buildWhatsappLink } from "./whatsapp";
 
 export function formatPrice(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

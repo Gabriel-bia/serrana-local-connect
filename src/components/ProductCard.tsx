@@ -7,6 +7,7 @@ import { logWhatsappClick } from "@/lib/whatsapp-clicks";
 import { ShareButton } from "@/components/ShareButton";
 import { productShareMessage, publicProductUrl } from "@/lib/discovery";
 import { productWhatsapp } from "@/lib/product-contact";
+import { itemContactMessage } from "@/lib/whatsapp";
 
 
 export type ProductSelection = { active: boolean; selected: boolean; toggle: () => void };
@@ -111,7 +112,8 @@ export function ProductCard({ product, store, selection }: { product: Product; s
                 window.open(
                   buildWhatsappLink(
                     waLink,
-                    `Olá, vim pelo app Serrana Express! Tenho interesse no produto "${product.name}".`,
+                    itemContactMessage("produto", product),
+                    true,
                   ),
                   "_blank",
                   "noopener,noreferrer",

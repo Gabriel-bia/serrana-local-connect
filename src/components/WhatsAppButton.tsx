@@ -5,6 +5,7 @@ import { logWhatsappClick } from "@/lib/whatsapp-clicks";
 export function WhatsAppButton({
   link,
   message,
+  replaceMessage = false,
   label = "Conversar no WhatsApp",
   className = "",
   storeId,
@@ -13,13 +14,14 @@ export function WhatsAppButton({
   /** Link completo do WhatsApp cadastrado pelo admin. */
   link: string;
   message?: string;
+  replaceMessage?: boolean;
   label?: string;
   className?: string;
   /** Identificação da loja para registrar o clique. */
   storeId?: string;
   storeName?: string;
 }) {
-  const href = link ? buildWhatsappLink(link, message) : "#";
+  const href = link ? buildWhatsappLink(link, message, replaceMessage) : "#";
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!link) {
