@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { orderProducts, partitionProducts, productShareMessage, publicProductUrl, publicProfileUrl, selectedProductsMessage, toggleProduct } from "./discovery";
+import { orderProducts, partitionProducts, productShareMessage, providerShareMessage, publicProductUrl, publicProfileUrl, publicServiceUrl, selectedProductsMessage, serviceShareMessage, toggleProduct } from "./discovery";
 
 const products = Array.from({ length: 24 }, (_, i) => ({ id: `p-${i}`, featured: i < 8, categoryId: `c-${i % 3}` }));
 describe("product discovery rules", () => {
@@ -64,5 +64,26 @@ describe("product discovery rules", () => {
     const message = productShareMessage({ id: "p-2", name: "Artesanato", price: 0 });
     assert.ok(message.includes("valor a combinar"));
     assert.ok(!message.includes("R$"));
+  });
+  it("service card share message carries name, price, provider and the service link", () => {
+    const message = serviceShareMessage({ id: "s-1", name: "Instalação de ar", price: 150 }, { name: "João" });
+    assert.ok(message.includes("Instalação de ar"));
+    assert.ok(message.includes("150,00"));
+    assert.ok(message.includes("João"));
+    assert.ok(message.endsWith("https://serrana-express.lovable.app/servico/s-1"));
+  });
+  it("service card share message says valor a combinar when there is no price", () => {
+    const message = serviceShareMessage({ id: "s-2", name: "Orçamento", price: null });
+    assert.ok(message.includes("valor a combinar"));
+    assert.ok(!message.includes("R$"));
+  });
+  it("provider card share message carries name, city and the provider link", () => {
+    const message = providerShareMessage({ id: "pr-1", name: "Maria Eletricista", city: "Serrana" });
+    assert.ok(message.includes("Maria Eletricista"));
+    assert.ok(message.includes("Serrana"));
+    assert.ok(message.endsWith("https://serrana-express.lovable.app/prestador/pr-1"));
+  });
+  it("service card share links to the published service page", () => {
+    assert.equal(publicServiceUrl("s-1"), "https://serrana-express.lovable.app/servico/s-1");
   });
 });

@@ -39,7 +39,7 @@ export function ShareButton({
   const [copied, setCopied] = useState(false);
   const [manualCopy, setManualCopy] = useState(false);
   const content = text.includes(url) ? text : `${text}\n\n${url}`;
-  const fallbackContent = imageUrl?.startsWith("https://") ? `${content}\n\nFoto do produto:\n${imageUrl}` : content;
+  const fallbackContent = imageUrl?.startsWith("https://") ? `${content}\n\nFoto:\n${imageUrl}` : content;
   const share = async () => {
     if (typeof navigator.share === "function") {
       try {

@@ -22,3 +22,4 @@
 - [x] Validar a página inicial no navegador (sem erros; produtos e prestadores aparecem)
 
 - [x] Opção "valor a combinar" nos preços de produtos e serviços no admin, com exibição "A combinar" no site
+- [x] Botão de compartilhar (link, descrição e imagem) em todos os cards: produto, serviço, prestador, loja e trabalho

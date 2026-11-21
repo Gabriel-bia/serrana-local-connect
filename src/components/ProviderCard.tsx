@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { Provider } from "@/data/seed";
+import { ShareButton } from "@/components/ShareButton";
+import { providerShareMessage, publicProfileUrl } from "@/lib/discovery";
 
 export function ProviderCard({
   provider,
@@ -37,9 +39,25 @@ export function ProviderCard({
             {categoryName}
           </span>
         )}
-        {provider.city && (
-          <p className="mt-1 text-[11px] text-muted-foreground">{provider.city}</p>
-        )}
+        <div className="mt-1 flex items-center justify-between gap-2">
+          {provider.city && (
+            <p className="text-[11px] text-muted-foreground">{provider.city}</p>
+          )}
+          <span
+            data-product-action
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            className="ml-auto"
+          >
+            <ShareButton
+              variant="icon"
+              label={`Compartilhar ${provider.name}`}
+              title={provider.name}
+              text={providerShareMessage(provider)}
+              url={publicProfileUrl("prestador", provider.id)}
+              imageUrl={provider.photo || provider.cover}
+            />
+          </span>
+        </div>
       </div>
     </Link>
   );

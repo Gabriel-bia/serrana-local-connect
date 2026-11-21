@@ -1,4 +1,6 @@
 import type { ProviderWork } from "@/data/seed";
+import { ShareButton } from "@/components/ShareButton";
+import { workShareMessage, publicProfileUrl } from "@/lib/discovery";
 
 export function WorkCard({ work }: { work: ProviderWork }) {
   const date = work.date
@@ -19,7 +21,19 @@ export function WorkCard({ work }: { work: ProviderWork }) {
         {work.description && (
           <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{work.description}</p>
         )}
-        {date && <p className="mt-2 text-[11px] font-medium text-primary">{date}</p>}
+        <div className="mt-2 flex items-center justify-between gap-2">
+          {date && <p className="text-[11px] font-medium text-primary">{date}</p>}
+          <span className="ml-auto">
+            <ShareButton
+              variant="icon"
+              label={`Compartilhar ${work.title}`}
+              title={work.title}
+              text={workShareMessage(work)}
+              url={publicProfileUrl("prestador", work.providerId)}
+              imageUrl={work.image}
+            />
+          </span>
+        </div>
       </div>
     </div>
   );

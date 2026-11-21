@@ -8,11 +8,38 @@ export function publicProductUrl(id: string) {
   return `${PUBLIC_ORIGIN}/produto/${encodeURIComponent(id)}`;
 }
 
+export function publicServiceUrl(id: string) {
+  return `${PUBLIC_ORIGIN}/servico/${encodeURIComponent(id)}`;
+}
+
 export function productShareMessage(product: { id: string; name: string; price: number }) {
   const price = Number.isFinite(product.price) && product.price > 0
     ? ` — ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(product.price)}`
     : " — valor a combinar";
   return `Confira este produto que encontrei no Serrana Express!\n\n• ${product.name}${price}\n\nVeja todos os detalhes:\n${publicProductUrl(product.id)}`;
+}
+
+export function serviceShareMessage(service: { id: string; name: string; price?: number | null }, provider?: { name: string }) {
+  const price = service.price != null && Number.isFinite(service.price) && service.price > 0
+    ? ` — ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(service.price)}`
+    : " — valor a combinar";
+  const by = provider?.name ? `\nPrestador: ${provider.name}` : "";
+  return `Confira este serviço que encontrei no Serrana Express!\n\n• ${service.name}${price}${by}\n\nVeja todos os detalhes:\n${publicServiceUrl(service.id)}`;
+}
+
+export function providerShareMessage(provider: { id: string; name: string; city?: string }) {
+  const city = provider.city ? `\n${provider.city}` : "";
+  return `Conheça ${provider.name} no Serrana Express!${city}\n\nVeja o perfil completo:\n${publicProfileUrl("prestador", provider.id)}`;
+}
+
+export function storeShareMessage(store: { id: string; name: string; description?: string }) {
+  const description = store.description?.trim() ? `\n${store.description.trim()}` : "";
+  return `Conheça a loja ${store.name} no Serrana Express!${description}\n\nVeja todos os produtos:\n${publicProfileUrl("loja", store.id)}`;
+}
+
+export function workShareMessage(work: { providerId: string; title: string; description?: string }) {
+  const description = work.description?.trim() ? `\n${work.description.trim()}` : "";
+  return `Olha este trabalho que encontrei no Serrana Express!\n\n• ${work.title}${description}\n\nVeja mais no perfil do prestador:\n${publicProfileUrl("prestador", work.providerId)}`;
 }
 
 function rank(value: string, seed: number) {

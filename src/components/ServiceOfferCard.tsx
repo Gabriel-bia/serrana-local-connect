@@ -4,6 +4,8 @@ import type { ProviderService, Provider } from "@/data/seed";
 import { formatPrice, buildWhatsappLink } from "@/lib/store";
 import { logWhatsappClick } from "@/lib/whatsapp-clicks";
 import { itemContactMessage } from "@/lib/whatsapp";
+import { ShareButton } from "@/components/ShareButton";
+import { serviceShareMessage, publicServiceUrl } from "@/lib/discovery";
 
 export function ServiceOfferCard({
   service,
@@ -54,29 +56,41 @@ export function ServiceOfferCard({
         {service.description && (
           <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{service.description}</p>
         )}
-        {waLink && provider && (
-          <span
-            data-product-action
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              logWhatsappClick({ storeId: provider.id, storeName: provider.name });
-              window.open(
-                buildWhatsappLink(
-                  waLink,
-                  itemContactMessage("servico", service),
-                  true,
-                ),
-                "_blank",
-                "noopener,noreferrer",
-              );
-            }}
-            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-whatsapp)] px-3 py-2 text-xs font-semibold text-[var(--color-whatsapp-foreground)] shadow-sm transition hover:opacity-90"
-            aria-label="Conversar no WhatsApp"
-          >
-            <MessageCircle className="h-4 w-4" /> WhatsApp
+        <div className="mt-3 flex items-center gap-2">
+          <span data-product-action onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+            <ShareButton
+              variant="icon"
+              label={`Compartilhar ${service.name}`}
+              title={service.name}
+              text={serviceShareMessage(service, provider)}
+              url={publicServiceUrl(service.id)}
+              imageUrl={service.image}
+            />
           </span>
-        )}
+          {waLink && provider && (
+            <span
+              data-product-action
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                logWhatsappClick({ storeId: provider.id, storeName: provider.name });
+                window.open(
+                  buildWhatsappLink(
+                    waLink,
+                    itemContactMessage("servico", service),
+                    true,
+                  ),
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--color-whatsapp)] px-3 py-2 text-xs font-semibold text-[var(--color-whatsapp-foreground)] shadow-sm transition hover:opacity-90"
+              aria-label="Conversar no WhatsApp"
+            >
+              <MessageCircle className="h-4 w-4" /> WhatsApp
+            </span>
+          )}
+        </div>
       </div>
     </Link>
   );
