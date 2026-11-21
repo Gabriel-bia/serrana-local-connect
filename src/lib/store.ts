@@ -442,6 +442,8 @@ export const dataApi = {
       loadAll();
       throw error;
     }
+    // Store contact changes also update linked products atomically in the database.
+    if (key === "stores") await loadTable("products");
   },
   async remove<K extends keyof DataShape>(key: K, id: string) {
     const cfg = map[key];

@@ -6,6 +6,7 @@ import { formatPrice, buildWhatsappLink } from "@/lib/store";
 import { logWhatsappClick } from "@/lib/whatsapp-clicks";
 import { ShareButton } from "@/components/ShareButton";
 import { productShareMessage, publicProductUrl } from "@/lib/discovery";
+import { productWhatsapp } from "@/lib/product-contact";
 
 
 export type ProductSelection = { active: boolean; selected: boolean; toggle: () => void };
@@ -19,7 +20,7 @@ export function ProductCard({ product, store, selection }: { product: Product; s
     timer.current = null;
   };
   useEffect(() => cancelHold, []);
-  const waLink = product.whatsapp || store?.whatsapp;
+  const waLink = productWhatsapp(product, store);
   const originalPrice = product.originalPrice;
   const hasPromo =
     product.price > 0 && originalPrice != null && originalPrice > 0 && originalPrice > product.price;

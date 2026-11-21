@@ -29,6 +29,13 @@
       "when": 1794605952657,
       "tag": "0003_product_activation",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795265974598,
+      "tag": "0004_sync_store_product_whatsapp",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,7 @@
  # Architecture rules
 
+- Store WhatsApp changes synchronize linked product contacts in a database trigger under existing RLS; public product actions resolve the store contact first and administrative saves reload products to avoid stale copied links.
+
 - Administrative search filters the existing database-backed live catalog with shared accent-insensitive matching; reload on administrative entry to include admin-only inactive rows.
 - Product activation is persisted independently of featured status; public views exclude inactive products and existing admin RLS retains read/edit access.
 - Scope administrative scrolling to the dashboard content wrapper so listings and editors have viewport-bounded vertical scroll without changing public pages.

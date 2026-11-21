@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { useData, useDataReady, formatPrice } from "@/lib/store";
 import { BackButton } from "@/components/BackButton";
+import { productWhatsapp } from "@/lib/product-contact";
 
 export const Route = createFileRoute("/produto/$id")({
   head: ({ params }) => ({ meta: [
@@ -61,7 +62,7 @@ function ProdutoPage() {
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <WhatsAppButton
-                link={product.whatsapp || store.whatsapp}
+                link={productWhatsapp(product, store)}
                 storeId={store.id}
                 storeName={store.name}
                 message={`Olá, vim pelo app Serrana Express! Tenho interesse no produto "${product.name}".`}
