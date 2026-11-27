@@ -36,6 +36,13 @@
       "when": 1795265974598,
       "tag": "0004_sync_store_product_whatsapp",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795767420521,
+      "tag": "0005_banner_schedule",
+      "breakpoints": true
     }
   ]
 }

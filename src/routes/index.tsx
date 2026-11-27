@@ -10,6 +10,8 @@ import { loadPriorityCatalog } from "@/lib/catalog.functions";
 import heroBanner from "@/assets/hero-banner-serrana-v2.png.asset.json";
 import { useDiscovery } from "@/components/DiscoveryProvider";
 import { partitionProducts } from "@/lib/discovery";
+import { AdBannerCarousel } from "@/components/AdBannerCarousel";
+import { visibleBanners } from "@/lib/banners";
 
 
 export const Route = createFileRoute("/")({
@@ -87,7 +89,9 @@ function Index() {
     products: allProducts,
     providers: allProviders,
     serviceCategories,
+    banners,
   } = Route.useLoaderData();
+  const adBanners = useMemo(() => visibleBanners(banners, Date.now()), [banners]);
   const [q, setQ] = useState("");
   const { seed } = useDiscovery();
   const navigate = useNavigate();
@@ -232,6 +236,8 @@ function Index() {
           </div>
         </div>
       </section>
+
+      <AdBannerCarousel banners={adBanners} />
 
       {featured.length > 0 && <section className="container mx-auto px-4 py-6" aria-label="Produtos em destaque">
         <div className="mb-4 flex items-center gap-2">

@@ -87,6 +87,10 @@ const map = {
       subtitle: (r.subtitle as string) ?? "",
       image: (r.image as string) ?? "",
       link: (r.link as string) ?? undefined,
+      active: r.active !== false,
+      position: Number(r.position ?? 0),
+      startsAt: (r.starts_at as string) ?? undefined,
+      endsAt: (r.ends_at as string) ?? undefined,
     }),
     toRow: (b: Banner): Row => ({
       id: b.id,
@@ -94,6 +98,10 @@ const map = {
       subtitle: b.subtitle,
       image: b.image,
       link: b.link ?? null,
+      active: b.active !== false,
+      position: b.position ?? 0,
+      starts_at: b.startsAt || null,
+      ends_at: b.endsAt || null,
     }),
   },
   stores: {

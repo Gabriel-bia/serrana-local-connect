@@ -141,28 +141,40 @@ export type Database = {
       }
       banners: {
         Row: {
+          active: boolean
           created_at: string
+          ends_at: string | null
           id: string
           image: string
           link: string | null
+          position: number
+          starts_at: string | null
           subtitle: string
           title: string
           updated_at: string
         }
         Insert: {
+          active?: boolean
           created_at?: string
+          ends_at?: string | null
           id: string
           image?: string
           link?: string | null
+          position?: number
+          starts_at?: string | null
           subtitle?: string
           title?: string
           updated_at?: string
         }
         Update: {
+          active?: boolean
           created_at?: string
+          ends_at?: string | null
           id?: string
           image?: string
           link?: string | null
+          position?: number
+          starts_at?: string | null
           subtitle?: string
           title?: string
           updated_at?: string

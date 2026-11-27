@@ -94,6 +94,10 @@ export const loadPriorityCatalog = createServerFn({ method: "GET" }).handler(
         subtitle: String(x.subtitle ?? ""),
         image: String(x.image ?? ""),
         link: x.link ? String(x.link) : undefined,
+        active: x.active !== false,
+        position: Number(x.position ?? 0),
+        ...(x.starts_at ? { startsAt: String(x.starts_at) } : {}),
+        ...(x.ends_at ? { endsAt: String(x.ends_at) } : {}),
       })),
       stores: rows(stores).map((x): Store => ({
         id: String(x.id ?? ""),

@@ -884,22 +884,25 @@ function ServicesAdmin() {
 function BannersAdmin() {
   const { banners } = useData();
   const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
-  const filtered = banners.filter((b) => matchesAdminSearch([b.title, b.subtitle], filters, [], undefined));
+  const filtered = banners.filter((b) => matchesAdminSearch([b.title, b.subtitle, b.link], filters, [], b.active !== false)).sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  const toLocal = (v?: string) => (v ? new Date(new Date(v).getTime() - new Date(v).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "");
+  const fromLocal = (v: string) => (v ? new Date(v).toISOString() : undefined);
   const [editing, setEditing] = useState<Banner | null>(null);
-  const blank: Banner = { id: "", title: "", subtitle: "", image: "", link: "" };
+  const blank: Banner = { id: "", title: "", subtitle: "", image: "", link: "", active: true, position: banners.length + 1 };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
-        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} />
+        <AdminSearchBar value={filters} onChange={setFilters} count={filtered.length} status />
         <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Título</th><th className="p-3">Subtítulo</th><th></th></tr></thead>
+          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground"><tr><th className="p-3">Ordem</th><th className="p-3">Banner</th><th className="p-3">Status</th><th></th></tr></thead>
           <tbody>
             {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhum registro encontrado.</td></tr>}
             {filtered.map((b) => (
               <tr key={b.id} className="border-t border-border">
-                <td className="p-3 font-medium">{b.title}</td>
-                <td className="p-3 text-muted-foreground">{b.subtitle}</td>
+                <td className="p-3">{b.position ?? 0}</td>
+                <td className="p-3"><div className="flex items-center gap-2">{b.image && <img src={b.image} alt="" className="h-10 w-20 rounded object-cover" />}<div className="min-w-0"><div className="font-medium truncate">{b.title}</div><div className="text-xs text-muted-foreground truncate">{b.link}</div></div></div></td>
+                <td className="p-3"><button type="button" onClick={() => dataApi.upsert("banners", { ...b, active: b.active === false })} className={b.active === false ? "text-xs text-muted-foreground underline" : "text-xs font-semibold text-primary underline"}>{b.active === false ? "Inativo" : "Ativo"}</button></td>
                 <td className="p-3 text-right">
                   <button onClick={() => setEditing(b)} className="mr-2 text-primary"><Pencil className="h-4 w-4" /></button>
                   <button onClick={() => confirm("Excluir banner?") && dataApi.remove("banners", b.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
@@ -922,7 +925,11 @@ function BannersAdmin() {
           <Field label="Título"><input className={inputClass} value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} required /></Field>
           <Field label="Subtítulo"><input className={inputClass} value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} /></Field>
           <ImageUploadField label="Imagem do banner" value={editing.image} onChange={(v) => setEditing({ ...editing, image: v })} />
-          <Field label="Link (opcional)"><input className={inputClass} value={editing.link ?? ""} onChange={(e) => setEditing({ ...editing, link: e.target.value })} /></Field>
+          <Field label="Link de destino (loja, serviço ou site externo)"><input className={inputClass} placeholder="/loja/... ou https://..." value={editing.link ?? ""} onChange={(e) => setEditing({ ...editing, link: e.target.value })} /></Field>
+          <Field label="Ordem de exibição"><input type="number" className={inputClass} value={editing.position ?? 0} onChange={(e) => setEditing({ ...editing, position: Number(e.target.value) })} /></Field>
+          <Field label="Início da exibição (opcional)"><input type="datetime-local" className={inputClass} value={toLocal(editing.startsAt)} onChange={(e) => setEditing({ ...editing, startsAt: fromLocal(e.target.value) })} /></Field>
+          <Field label="Término da exibição (opcional)"><input type="datetime-local" className={inputClass} value={toLocal(editing.endsAt)} onChange={(e) => setEditing({ ...editing, endsAt: fromLocal(e.target.value) })} /></Field>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.active !== false} onChange={(e) => setEditing({ ...editing, active: e.target.checked })} /> Banner ativo</label>
           <div className="flex gap-2 pt-2">
             <button type="submit" className="flex-1 rounded-lg bg-primary py-2 font-semibold text-primary-foreground">Salvar</button>
             <button type="button" onClick={() => setEditing(null)} className="rounded-lg border border-border px-3 py-2 font-medium">Cancelar</button>

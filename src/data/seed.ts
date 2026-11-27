@@ -60,6 +60,10 @@ export type Banner = {
   subtitle: string;
   image: string;
   link?: string;
+  active?: boolean;
+  position?: number;
+  startsAt?: string;
+  endsAt?: string;
 };
 
 /* ============ Prestadores de Serviços ============ */
