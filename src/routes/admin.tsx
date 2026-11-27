@@ -882,7 +882,7 @@ function ServicesAdmin() {
 /* ---------------- Banners ---------------- */
 
 function BannersAdmin() {
-  const { banners } = useData();
+  const { banners, stores, providers } = useData();
   const [filters, setFilters] = useState<AdminFilters>({ query: "", category: "", status: "" });
   const filtered = banners.filter((b) => matchesAdminSearch([b.title, b.subtitle, b.link], filters, [], b.active !== false)).sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
   const toLocal = (v?: string) => (v ? new Date(new Date(v).getTime() - new Date(v).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "");
@@ -926,6 +926,13 @@ function BannersAdmin() {
           <Field label="Subtítulo"><input className={inputClass} value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} /></Field>
           <ImageUploadField label="Imagem do banner" value={editing.image} onChange={(v) => setEditing({ ...editing, image: v })} />
           <Field label="Link de destino (loja, serviço ou site externo)"><input className={inputClass} placeholder="/loja/... ou https://..." value={editing.link ?? ""} onChange={(e) => setEditing({ ...editing, link: e.target.value })} /></Field>
+          <Field label="Perfil do anunciante (botão no banner)">
+            <select className={inputClass} value={editing.profileKind && editing.profileId ? `${editing.profileKind}:${editing.profileId}` : ""} onChange={(e) => { const [k, id] = e.target.value.split(":"); setEditing({ ...editing, profileKind: id ? (k as "loja" | "prestador") : undefined, profileId: id || undefined }); }}>
+              <option value="">Nenhum</option>
+              <optgroup label="Lojas">{stores.map((st) => <option key={st.id} value={`loja:${st.id}`}>{st.name}</option>)}</optgroup>
+              <optgroup label="Prestadores">{providers.map((pr) => <option key={pr.id} value={`prestador:${pr.id}`}>{pr.name}</option>)}</optgroup>
+            </select>
+          </Field>
           <Field label="Ordem de exibição"><input type="number" className={inputClass} value={editing.position ?? 0} onChange={(e) => setEditing({ ...editing, position: Number(e.target.value) })} /></Field>
           <Field label="Início da exibição (opcional)"><input type="datetime-local" className={inputClass} value={toLocal(editing.startsAt)} onChange={(e) => setEditing({ ...editing, startsAt: fromLocal(e.target.value) })} /></Field>
           <Field label="Término da exibição (opcional)"><input type="datetime-local" className={inputClass} value={toLocal(editing.endsAt)} onChange={(e) => setEditing({ ...editing, endsAt: fromLocal(e.target.value) })} /></Field>

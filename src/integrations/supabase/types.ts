@@ -148,6 +148,8 @@ export type Database = {
           image: string
           link: string | null
           position: number
+          profile_id: string | null
+          profile_kind: string | null
           starts_at: string | null
           subtitle: string
           title: string
@@ -161,6 +163,8 @@ export type Database = {
           image?: string
           link?: string | null
           position?: number
+          profile_id?: string | null
+          profile_kind?: string | null
           starts_at?: string | null
           subtitle?: string
           title?: string
@@ -174,6 +178,8 @@ export type Database = {
           image?: string
           link?: string | null
           position?: number
+          profile_id?: string | null
+          profile_kind?: string | null
           starts_at?: string | null
           subtitle?: string
           title?: string

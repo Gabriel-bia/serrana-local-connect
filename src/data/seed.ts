@@ -64,6 +64,8 @@ export type Banner = {
   position?: number;
   startsAt?: string;
   endsAt?: string;
+  profileKind?: "loja" | "prestador";
+  profileId?: string;
 };
 
 /* ============ Prestadores de Serviços ============ */

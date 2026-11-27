@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { Banner } from "@/data/seed";
 import { isExternalLink } from "@/lib/banners";
 
@@ -49,7 +50,7 @@ export function AdBannerCarousel({ banners }: { banners: Banner[] }) {
               />
             );
             return (
-              <div key={b.id} className="h-full w-full shrink-0" aria-hidden={i !== index}>
+              <div key={b.id} className="relative h-full w-full shrink-0" aria-hidden={i !== index}>
                 {b.link ? (
                   <a
                     href={b.link}
@@ -60,6 +61,16 @@ export function AdBannerCarousel({ banners }: { banners: Banner[] }) {
                     {img}
                   </a>
                 ) : img}
+                {b.profileKind && b.profileId && (
+                  <Link
+                    to={b.profileKind === "loja" ? "/loja/$id" : "/prestador/$id"}
+                    params={{ id: b.profileId }}
+                    tabIndex={i === index ? 0 : -1}
+                    className="absolute bottom-8 right-3 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg transition hover:scale-105 sm:bottom-10 sm:px-4 sm:py-2 sm:text-sm"
+                  >
+                    {b.profileKind === "loja" ? "Ver loja" : "Ver perfil"} <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                )}
               </div>
             );
           })}

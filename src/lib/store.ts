@@ -91,6 +91,8 @@ const map = {
       position: Number(r.position ?? 0),
       startsAt: (r.starts_at as string) ?? undefined,
       endsAt: (r.ends_at as string) ?? undefined,
+      profileKind: (r.profile_kind as Banner["profileKind"]) ?? undefined,
+      profileId: (r.profile_id as string) ?? undefined,
     }),
     toRow: (b: Banner): Row => ({
       id: b.id,
@@ -102,6 +104,8 @@ const map = {
       position: b.position ?? 0,
       starts_at: b.startsAt || null,
       ends_at: b.endsAt || null,
+      profile_kind: b.profileKind && b.profileId ? b.profileKind : null,
+      profile_id: b.profileKind && b.profileId ? b.profileId : null,
     }),
   },
   stores: {

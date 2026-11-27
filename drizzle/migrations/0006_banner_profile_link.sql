@@ -1,0 +1,1 @@
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS profile_kind text CHECK (profile_kind IN ('loja','prestador')), ADD COLUMN IF NOT EXISTS profile_id text;
